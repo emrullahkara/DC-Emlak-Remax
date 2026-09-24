@@ -1,0 +1,1448 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4338ca">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="DC Emlak — emlak danışmanları için hepsi bir arada çalışma alanı. Tıklanabilir arayüz prototipi.">
+<title>DC Emlak Prototip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ Tokens ============ */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --surface-2:#f1f3f6; --surface-3:#e9ecf1; --border:#e2e5ea;
+  --text:#131722; --text-2:#475061; --muted:#7a8394;
+  --brand:#4338ca; --brand-hover:#3730a3; --brand-soft:#eef0ff; --brand-ink:#ffffff;
+  --ok:#15803d; --ok-bg:#e7f6ec; --warn:#b45309; --warn-bg:#fdf3e1; --err:#c02626; --err-bg:#fdecec; --info:#0369a1; --info-bg:#e5f1fa;
+  --chart:#4f46e5; --chart-grid:#e8ebf0;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.07);
+  --shadow-lg:0 16px 48px rgba(16,24,40,.22);
+  --r:12px; --r-sm:8px; --gutter:24px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1016; --surface:#151921; --surface-2:#1b2029; --surface-3:#252b36; --border:#282f3b;
+    --text:#e7eaf0; --text-2:#b1b8c4; --muted:#868fa0;
+    --brand:#8b93ff; --brand-hover:#a5abff; --brand-soft:#22254a; --brand-ink:#0d1016;
+    --ok:#4ade80; --ok-bg:#11271a; --warn:#fbbf24; --warn-bg:#2c2310; --err:#f87171; --err-bg:#301517; --info:#38bdf8; --info-bg:#0e2433;
+    --chart:#8b93ff; --chart-grid:#252b36;
+    --shadow:0 1px 2px rgba(0,0,0,.4); --shadow-lg:0 16px 48px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1016; --surface:#151921; --surface-2:#1b2029; --surface-3:#252b36; --border:#282f3b;
+  --text:#e7eaf0; --text-2:#b1b8c4; --muted:#868fa0;
+  --brand:#8b93ff; --brand-hover:#a5abff; --brand-soft:#22254a; --brand-ink:#0d1016;
+  --ok:#4ade80; --ok-bg:#11271a; --warn:#fbbf24; --warn-bg:#2c2310; --err:#f87171; --err-bg:#301517; --info:#38bdf8; --info-bg:#0e2433;
+  --chart:#8b93ff; --chart-grid:#252b36;
+  --shadow:0 1px 2px rgba(0,0,0,.4); --shadow-lg:0 16px 48px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+
+/* ============ Base ============ */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--brand);text-decoration:none}
+h1,h2,h3,h4{margin:0;line-height:1.25}
+h1{font-size:22px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:16px;font-weight:600}
+h3{font-size:14px;font-weight:600}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)} .t2{color:var(--text-2)} .small{font-size:12px} .xs{font-size:11px}
+.bold{font-weight:600}
+.row{display:flex;align-items:center;gap:8px}
+.row.wrap{flex-wrap:wrap}
+.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:12px}
+.grow{flex:1;min-width:0}
+.ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hide{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ============ Shell ============ */
+.proto-banner{background:var(--warn-bg);color:var(--warn);font-size:12px;font-weight:500;text-align:center;padding:5px 16px;border-bottom:1px solid var(--border)}
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 14px;font-weight:700;font-size:16px;letter-spacing:-.01em;color:var(--text)}
+.logo{width:32px;height:32px;border-radius:9px;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;flex:none}
+.logo svg{width:20px;height:20px}
+.brand small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+.nav-group{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:12px 10px 4px;font-weight:600}
+.nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--text-2);font-weight:500;min-height:38px}
+.nav a:hover{background:var(--surface-2);color:var(--text)}
+.nav a.active{background:var(--brand-soft);color:var(--brand)}
+.nav a .cnt{margin-left:auto;font-size:11px;background:var(--surface-3);color:var(--text-2);padding:1px 7px;border-radius:99px}
+.nav a.active .cnt{background:var(--brand);color:var(--brand-ink)}
+.side-foot{margin-top:auto;padding:12px 8px 0;border-top:1px solid var(--border)}
+.me{display:flex;gap:10px;align-items:center}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.avatar.lg{width:44px;height:44px;font-size:15px}
+
+main{min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:10px var(--gutter);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.topbar .mlogo{display:none}
+.search-btn{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:0 10px;height:38px;color:var(--muted);min-width:260px;cursor:pointer}
+.search-btn kbd{margin-left:auto}
+kbd{font:11px/1 Inter,sans-serif;border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:3px 5px;color:var(--muted);background:var(--surface-2)}
+.icon-btn{position:relative;width:40px;height:40px;border-radius:9px;display:grid;place-items:center;border:1px solid transparent;background:transparent;color:var(--text-2);cursor:pointer}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.dot{position:absolute;top:6px;right:6px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--err);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center}
+.content{padding:24px var(--gutter) 48px;width:100%;max-width:1320px;margin:0 auto}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.page-head p{color:var(--muted);margin-top:4px}
+.foot{padding:16px var(--gutter);color:var(--muted);font-size:12px;text-align:center}
+
+.tabbar{display:none}
+
+/* ============ Components ============ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.card-b{padding:14px 16px}
+.card-h h2{font-size:14px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.keep3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.kokpit-grid{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.primary:hover{background:var(--brand-hover)}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn.sm{height:30px;padding:0 10px;font-size:12px}
+.btn.lg{height:44px;padding:0 18px;font-size:14px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.block{width:100%}
+.btn.call{background:var(--ok);border-color:var(--ok);color:#fff;min-width:64px}
+
+.badge{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:99px;font-size:11.5px;font-weight:600;white-space:nowrap;background:var(--surface-3);color:var(--text-2)}
+.badge svg.i{width:13px;height:13px;stroke-width:2.2}
+.badge.ok{background:var(--ok-bg);color:var(--ok)}
+.badge.warn{background:var(--warn-bg);color:var(--warn)}
+.badge.err{background:var(--err-bg);color:var(--err)}
+.badge.info{background:var(--info-bg);color:var(--info)}
+.badge.brand{background:var(--brand-soft);color:var(--brand)}
+.sdot{width:8px;height:8px;border-radius:50%;display:inline-block;background:currentColor;flex:none}
+
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:99px;border:1px solid var(--border);background:var(--surface);font-size:13px;font-weight:500;cursor:pointer;color:var(--text-2);white-space:nowrap}
+.chip.on{background:var(--brand-soft);border-color:transparent;color:var(--brand)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.lbl{font-size:12px;color:var(--text-2);font-weight:500}
+.input,select.input,textarea.input{height:38px;border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:0 10px;width:100%;min-width:0}
+textarea.input{height:auto;padding:8px 10px;resize:vertical}
+.input:focus,.btn:focus-visible,.chip:focus-visible,a:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.filters .input{width:auto}
+
+.progress{height:8px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+.progress > span{display:block;height:100%;border-radius:99px;background:var(--brand)}
+.progress.ok > span{background:var(--ok)} .progress.warn > span{background:var(--warn)} .progress.err > span{background:var(--err)}
+
+.kpi{padding:14px 16px}
+.kpi .v{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:4px}
+.kpi .l{font-size:12px;color:var(--muted);font-weight:500}
+.kpi .d{font-size:12px;margin-top:4px}
+.up{color:var(--ok)} .down{color:var(--err)}
+
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border);min-height:56px}
+.li:first-child{border-top:0}
+.li .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:none;background:var(--surface-2);color:var(--text-2)}
+.ic.ok{background:var(--ok-bg);color:var(--ok)} .ic.warn{background:var(--warn-bg);color:var(--warn)} .ic.err{background:var(--err-bg);color:var(--err)} .ic.info{background:var(--info-bg);color:var(--info)} .ic.brand{background:var(--brand-soft);color:var(--brand)}
+.li .t{font-weight:600}
+.li .s{font-size:12px;color:var(--muted)}
+.li.link{cursor:pointer} .li.link:hover{background:var(--surface-2)}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{padding:10px 12px;color:var(--text-2);font-weight:500;border-bottom:2px solid transparent;white-space:nowrap;margin-bottom:-1px}
+.tabs a.on{color:var(--brand);border-color:var(--brand)}
+.tabs a:hover{color:var(--text)}
+
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}
+.kv > div{padding:10px 0;border-bottom:1px dashed var(--border);display:flex;justify-content:space-between;gap:10px;padding-right:16px}
+.kv > div:nth-child(2n){padding-right:0;padding-left:16px}
+.kv dt{color:var(--muted);font-size:12.5px} .kv dd{margin:0;font-weight:600;text-align:right}
+
+/* responsive table -> cards */
+.rtable{width:100%;border-collapse:collapse}
+.rtable th{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
+.rtable td{padding:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.rtable tr:last-child td{border-bottom:0}
+.rtable tbody tr:hover{background:var(--surface-2)}
+.rtable .r{text-align:right}
+.rtable td.r,.nw{white-space:nowrap}
+.tbl-wrap{overflow-x:auto}
+.badge.wrap{white-space:normal;height:auto;min-height:22px;padding:3px 8px;line-height:1.3}
+
+.score{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:10px;font-weight:700;font-size:15px}
+.score.hi{background:var(--err-bg);color:var(--err)}
+.score.md{background:var(--warn-bg);color:var(--warn)}
+.score.lo{background:var(--surface-3);color:var(--text-2)}
+
+.heat{display:flex;align-items:center;gap:6px;min-width:90px}
+.heat .progress{flex:1;height:6px}
+
+/* photo placeholder */
+.ph{height:100%;position:relative;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,var(--h1),var(--h2));color:rgba(255,255,255,.85);display:grid;place-items:center}
+.ph svg{width:34%;height:34%;max-width:56px;stroke:rgba(255,255,255,.75);fill:none;stroke-width:1.4}
+.ph .cap{position:absolute;left:8px;bottom:8px;font-size:11px;font-weight:600;background:rgba(0,0,0,.45);color:#fff;padding:2px 7px;border-radius:6px}
+.ph .tag{position:absolute;right:8px;top:8px}
+
+/* portfolio card grid */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.pcard{cursor:pointer;overflow:hidden;display:flex;flex-direction:column}
+.pcard:hover{border-color:color-mix(in srgb,var(--brand) 40%,var(--border))}
+.pcard .ph{aspect-ratio:16/10;border-radius:0}
+.pcard .b{padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.price{font-weight:700;font-size:17px;letter-spacing:-.01em}
+
+/* ring */
+.ring{position:relative;width:84px;height:84px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .v{position:absolute;inset:0;display:grid;place-items:center;font-weight:700;font-size:22px}
+.ring .v small{display:block;font-size:10px;color:var(--muted);font-weight:500;text-align:center;margin-top:-4px}
+
+/* portfolio detail */
+.pd{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+.gallery{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:6px;height:260px}
+.gallery .ph:first-child{grid-row:1/3}
+.rail{display:flex;flex-direction:column;gap:16px;position:sticky;top:76px}
+.comp{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px dashed var(--border)}
+.comp:first-child{border-top:0}
+.comp .grow{font-weight:500}
+.sugg{display:flex;gap:8px;padding:8px 0;font-size:13px}
+.sugg svg{color:var(--warn);margin-top:1px}
+
+/* kanban */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,1fr);gap:12px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x proximity}
+.col{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);display:flex;flex-direction:column;min-height:420px;scroll-snap-align:start}
+.col-h{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:6px;border-bottom:1px solid var(--border)}
+.col-h .n{font-size:12px;color:var(--muted)}
+.col-b{padding:10px;display:flex;flex-direction:column;gap:8px;flex:1;transition:background .15s}
+.col.over .col-b{background:var(--brand-soft)}
+.kcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:grab;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.kcard:active{cursor:grabbing}
+.kcard.dragging{opacity:.4}
+.kcard .flags{display:flex;gap:4px;flex-wrap:wrap}
+
+/* calendar */
+.days{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.day{flex:1;min-width:52px;border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:8px 6px;text-align:center;cursor:pointer}
+.day b{display:block;font-size:17px}
+.day span{font-size:11px;color:var(--muted);text-transform:uppercase}
+.day.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.day.on span{color:inherit;opacity:.8}
+.agenda{display:flex;flex-direction:column;gap:12px}
+.appt{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px}
+.appt .tm{font-weight:700;font-size:15px;padding-top:12px}
+.appt .tm small{display:block;font-weight:500;color:var(--muted);font-size:11px}
+.appt .card{border-left:3px solid var(--c,var(--border))}
+
+/* chat */
+.inbox{display:grid;grid-template-columns:320px minmax(0,1fr);min-height:520px}
+.inbox .conv-list{border-right:1px solid var(--border)}
+.msgs{display:flex;flex-direction:column;gap:8px;padding:16px;min-height:360px}
+.bubble{max-width:78%;padding:8px 12px;border-radius:12px;background:var(--surface-2);font-size:13.5px}
+.bubble.me{align-self:flex-end;background:var(--brand);color:var(--brand-ink)}
+
+/* charts */
+.chart svg{width:100%;height:auto;display:block}
+.chart .ax{fill:var(--muted);font-size:11px;font-family:Inter,sans-serif}
+.chart .lb{fill:var(--text-2);font-size:11.5px;font-family:Inter,sans-serif;font-weight:500}
+.chart .gl{stroke:var(--chart-grid);stroke-width:1}
+.chart .bar{fill:var(--chart)}
+.chart .bar.dim{fill:color-mix(in srgb,var(--chart) 38%,var(--surface))}
+.chart .bar:hover{opacity:.8}
+.tip{position:fixed;z-index:200;pointer-events:none;background:var(--text);color:var(--bg);font-size:12px;padding:6px 9px;border-radius:7px;box-shadow:var(--shadow-lg);opacity:0;transition:opacity .1s;max-width:240px}
+.tip.on{opacity:1}
+
+/* toggle */
+.switch{position:relative;width:40px;height:24px;flex:none;border-radius:99px;background:var(--surface-3);border:1px solid var(--border);cursor:pointer;padding:0}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);transition:transform .15s}
+.switch[aria-checked="true"]{background:var(--ok);border-color:var(--ok)}
+.switch[aria-checked="true"]::after{transform:translateX(16px)}
+input[type=range]{width:100%;accent-color:var(--brand)}
+
+/* plans */
+.plan{padding:18px;display:flex;flex-direction:column;gap:10px}
+.plan.pop{border:2px solid var(--brand)}
+.plan ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.plan li{display:flex;gap:6px}
+.plan li svg{color:var(--ok)}
+.plan .pr{font-size:26px;font-weight:700;letter-spacing:-.02em}
+
+/* overlays */
+.overlay{position:fixed;inset:0;z-index:100;background:rgba(10,12,18,.45);display:flex;opacity:0;pointer-events:none;transition:opacity .18s}
+.overlay.on{opacity:1;pointer-events:auto}
+.sheet{margin-left:auto;width:min(480px,100%);height:100%;background:var(--surface);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateX(24px);transition:transform .2s}
+.overlay.on .sheet{transform:none}
+.sheet-h{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.sheet-h h2{flex:1}
+.sheet-b{padding:16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px}
+.sheet-b > *{flex-shrink:0}
+.sheet-f{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.overlay.center{align-items:center;justify-content:center;padding:16px}
+.modal{width:min(520px,100%);max-height:calc(100vh - 32px);background:var(--surface);border-radius:14px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;transform:scale(.97);transition:transform .18s}
+.overlay.on .modal{transform:none}
+.modal.wide{width:min(720px,100%)}
+.handle{display:none}
+
+.alert{display:flex;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px}
+.alert.err{background:var(--err-bg);color:var(--err)} .alert.warn{background:var(--warn-bg);color:var(--warn)} .alert.info{background:var(--info-bg);color:var(--info)} .alert.ok{background:var(--ok-bg);color:var(--ok)}
+.alert .body{color:var(--text)}
+.alert b{color:inherit}
+
+.steps{display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:10px;padding:8px 0;position:relative}
+.step .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;background:var(--surface-3);color:var(--text-2);flex:none;z-index:1}
+.step.done .n{background:var(--ok);color:#fff}
+.step.cur .n{background:var(--brand);color:var(--brand-ink)}
+.step:not(:last-child)::before{content:"";position:absolute;left:12.5px;top:30px;bottom:-6px;width:1px;background:var(--border)}
+
+details.obj{border:1px solid var(--border);border-radius:10px;padding:0 12px}
+details.obj summary{cursor:pointer;padding:10px 0;font-weight:600;list-style:none;display:flex;gap:8px;align-items:center}
+details.obj summary::-webkit-details-marker{display:none}
+details.obj[open] summary{border-bottom:1px dashed var(--border)}
+details.obj p{padding:10px 0;color:var(--text-2)}
+.script{background:var(--surface-2);border-radius:10px;padding:12px 14px;font-size:13.5px;color:var(--text-2);line-height:1.55}
+.script b{color:var(--text)}
+
+.otp{display:flex;gap:6px;justify-content:center}
+.otp input{width:42px;height:50px;text-align:center;font-size:20px;font-weight:700;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+
+.toast-wrap{position:fixed;z-index:300;left:50%;bottom:24px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:min(440px,calc(100% - 32px))}
+.toast{background:var(--text);color:var(--bg);padding:10px 14px;border-radius:10px;font-size:13px;box-shadow:var(--shadow-lg);display:flex;gap:8px;align-items:center;animation:tin .2s ease}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+
+/* command palette */
+.cmdk{width:min(620px,100%);align-self:flex-start;margin-top:10vh}
+.cmdk .in{display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--border)}
+.cmdk .in input{flex:1;border:0;background:transparent;height:54px;font-size:16px;outline:none;min-width:0}
+.cmdk .res{max-height:min(420px,60vh);overflow-y:auto;padding:6px}
+.cmdk .grp{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:8px 10px 4px;font-weight:600}
+.cmdk .it{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer}
+.cmdk .it.sel{background:var(--brand-soft)}
+.cmdk .it .s{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.quick button{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);cursor:pointer;font-weight:600;font-size:13px}
+.quick button .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center}
+.quick button:hover{border-color:var(--brand)}
+.navgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.navgrid a{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;border-radius:12px;background:var(--surface-2);color:var(--text);font-size:12.5px;font-weight:500;text-align:center}
+.navgrid a.active{background:var(--brand-soft);color:var(--brand)}
+
+.rec{width:92px;height:92px;border-radius:50%;background:var(--err);color:#fff;display:grid;place-items:center;margin:8px auto;animation:pulse 1.2s infinite}
+.rec svg{width:36px;height:36px}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--err) 50%,transparent)}100%{box-shadow:0 0 0 22px transparent}}
+
+.doc{border:1px solid var(--border);border-radius:10px;padding:18px;background:var(--surface-2);font-size:13px;line-height:1.7}
+.doc .f{background:var(--brand-soft);color:var(--brand);padding:1px 6px;border-radius:5px;font-weight:600}
+.doc .f.miss{background:var(--err-bg);color:var(--err)}
+
+/* ============ Mobile ============ */
+@media (max-width:1100px){
+  .kokpit-grid,.pd{grid-template-columns:minmax(0,1fr)}
+  .rail{position:static}
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:768px){
+  :root{--gutter:16px}
+  .app{grid-template-columns:minmax(0,1fr)}
+  .sidebar{display:none}
+  .topbar{padding:8px 16px;gap:4px}
+  .topbar .mlogo{display:flex}
+  .topbar .ttl{display:none}
+  .search-btn{min-width:0;width:40px;padding:0;justify-content:center;border-color:transparent;background:transparent;color:var(--text-2)}
+  .search-btn .lbl-s,.search-btn kbd{display:none}
+  .content{padding:16px 16px 104px}
+  .foot{padding-bottom:96px}
+  h1{font-size:20px}
+  .g2,.g3{grid-template-columns:minmax(0,1fr)}
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kv{grid-template-columns:minmax(0,1fr)}
+  .kv > div:nth-child(2n){padding-left:0}
+  .kv > div{padding-right:0}
+  .gallery{height:200px}
+  .inbox{grid-template-columns:minmax(0,1fr)}
+  .inbox.open .conv-list{display:none}
+  .inbox:not(.open) .conv-view{display:none}
+  .inbox .conv-list{border-right:0}
+  .tabbar{display:flex;position:fixed;z-index:40;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:6px 4px calc(6px + env(safe-area-inset-bottom));justify-content:space-around;align-items:flex-end}
+  .tabbar a,.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:500;color:var(--muted);background:none;border:0;padding:4px 0;min-height:44px;cursor:pointer}
+  .tabbar .active{color:var(--brand)}
+  .tabbar .plus{flex:none;width:56px;height:56px;border-radius:18px;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;margin:-22px 8px 0;box-shadow:var(--shadow-lg)}
+  .tabbar .plus svg{width:26px;height:26px;stroke-width:2.4}
+  .overlay:not(.center) .sheet{margin:auto 0 0;height:auto;max-height:88vh;width:100%;border-radius:18px 18px 0 0;transform:translateY(30px)}
+  .overlay.on:not(.center) .sheet{transform:none}
+  .handle{display:block;width:40px;height:4px;border-radius:9px;background:var(--surface-3);margin:8px auto 0}
+  .sheet-b{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .cmdk{margin-top:4vh}
+  .toast-wrap{bottom:92px}
+  /* table -> cards */
+  .rtable thead{display:none}
+  .rtable,.rtable tbody{display:block}
+  .rtable tr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;padding:12px 14px;border-bottom:1px solid var(--border);align-items:center}
+  .rtable td{padding:0;border:0;display:block}
+  .rtable td[data-m="hide"]{display:none}
+  .rtable td[data-m="full"]{grid-column:1/-1}
+  .rtable td[data-m="sub"]{grid-column:2/3}
+  .rtable td[data-l]::before{content:attr(data-l) " ";color:var(--muted);font-size:11px}
+  .rtable .r{text-align:left}
+  .appt{grid-template-columns:48px minmax(0,1fr);gap:8px}
+  .board{grid-auto-columns:minmax(236px,82%)}
+  .hide-m{display:none!important}
+  .li .t.ellipsis,h1.ellipsis{white-space:normal}
+  .rtable.kvm tr{grid-template-columns:minmax(0,1fr)}
+  .rtable.kvm td[data-l]{display:flex;justify-content:space-between;gap:8px}
+}
+@media (min-width:769px){ .only-m{display:none!important} }
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="proto-banner" role="note">Prototip — örnek verilerdir. Oranlar, şablonlar ve kişiler temsilidir.</div>
+<div class="app">
+  <aside class="sidebar" aria-label="Ana menü">
+    <a class="brand" href="#/kokpit"><span class="logo" id="logoMark"></span><span>DC Emlak<small>Kadıköy Ofisi</small></span></a>
+    <nav class="nav" id="sideNav"></nav>
+    <div class="side-foot">
+      <div class="me"><span class="avatar">EK</span><div class="grow"><div class="bold">Emrullah K.</div><div class="xs muted">Danışman · Yetki No 3401-2231</div></div></div>
+    </div>
+  </aside>
+  <main>
+    <header class="topbar">
+      <a class="mlogo row" href="#/kokpit" aria-label="DC Emlak ana sayfa"><span class="logo" id="logoMark2"></span><span class="bold">DC Emlak</span></a>
+      <div class="ttl bold" id="pageTitle"></div>
+      <div class="grow"></div>
+      <button class="search-btn" data-act="cmdk" aria-label="Ara"><span data-ico="search"></span><span class="lbl-s">Kişi, portföy, ada/parsel, telefon…</span><kbd>Ctrl K</kbd></button>
+      <button class="icon-btn" data-act="theme" aria-label="Tema değiştir" id="themeBtn"></button>
+      <button class="icon-btn" data-act="notifs" aria-label="Bildirimler"><span data-ico="bell"></span><span class="dot">3</span></button>
+    </header>
+    <div class="content" id="view" tabindex="-1"></div>
+    <div class="foot">DC Emlak · Tıklanabilir prototip v0.1 · Örnek verilerdir; gerçek kişi ve ilanlarla ilgisi yoktur.</div>
+  </main>
+</div>
+
+<nav class="tabbar" aria-label="Alt menü">
+  <a href="#/kokpit" data-tab="kokpit"><span data-ico="home"></span>Kokpit</a>
+  <a href="#/radar" data-tab="radar"><span data-ico="radar"></span>Radar</a>
+  <button class="plus" data-act="quick" aria-label="Hızlı ekle"><span data-ico="plus"></span></button>
+  <a href="#/mesajlar" data-tab="mesajlar"><span data-ico="msg"></span>Mesajlar</a>
+  <button data-act="menu" data-tab="menu"><span data-ico="menu"></span>Menü</button>
+</nav>
+
+<div class="overlay" id="sheetOv"><div class="sheet" role="dialog" aria-modal="true" id="sheet"></div></div>
+<div class="overlay center" id="modalOv"><div class="modal" role="dialog" aria-modal="true" id="modal"></div></div>
+<div class="overlay center" id="cmdkOv"><div class="modal cmdk" role="dialog" aria-modal="true" aria-label="Global arama">
+  <div class="in"><span data-ico="search"></span><input id="cmdkIn" placeholder="İsim, telefon, ilan no, ada/parsel, adres ara…" autocomplete="off"><kbd>Esc</kbd></div>
+  <div class="res" id="cmdkRes"></div>
+</div></div>
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+<div class="tip" id="tip"></div>
+
+<script>
+"use strict";
+/* ================= Icons ================= */
+const ICONS = {
+  home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  radar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12 19 5"/><circle cx="12" cy="12" r="1"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  msg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  building:'<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/>',
+  users:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 3.2a4 4 0 0 1 0 7.6M22 21a7 7 0 0 0-5-6.7"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+  kanban:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 7v7M12 7v4M16 7v9"/>',
+  cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+  calc:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h4"/>',
+  chart:'<path d="M3 3v18h18"/><path d="M8 17v-6M13 17V7M18 17v-4"/>',
+  sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+  pin:'<path d="M12 22s-8-6-8-12a8 8 0 0 1 16 0c0 6-8 12-8 12z"/><circle cx="12" cy="10" r="3"/>',
+  pen:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  down:'<path d="m22 17-8.5-8.5-5 5L2 7"/><path d="M16 17h6v-6"/>',
+  up:'<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/>',
+  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
+  userplus:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/>',
+  send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  left:'<path d="m15 18-6-6 6-6"/>', right:'<path d="m9 18 6-6-6-6"/>',
+  flame:'<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3.3.3 1.3 1.3 2.8 2.5 2.8z"/>',
+  wa:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  key:'<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/>',
+  lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  plug:'<path d="M12 22v-5M9 8V2M15 8V2M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8z"/>',
+  sparkle:'<path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/>',
+  gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
+  hourglass:'<path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4a2 2 0 0 0 .6-1.4V2"/>',
+  route:'<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+  mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
+  dots:'<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+  logo:'<path d="M4 20V10l8-6 8 6v10"/><path d="M9 20v-6h6v6"/><path d="M12 4v3"/>'
+};
+const ic = (n, cls='') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]||''}</svg>`;
+function hydrateIcons(root=document){ root.querySelectorAll('[data-ico]').forEach(el=>{ el.outerHTML = ic(el.dataset.ico); }); }
+
+/* ================= Formatting ================= */
+const TL = new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:0});
+const NUM = new Intl.NumberFormat('tr-TR');
+const tl = n => TL.format(Math.round(n));
+const num = n => NUM.format(n);
+const mTL = n => n >= 1e6 ? (n/1e6).toLocaleString('tr-TR',{maximumFractionDigits:2}) + ' M ₺' : tl(n);
+const pct = n => '%' + n.toLocaleString('tr-TR',{maximumFractionDigits:1});
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s).toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ı/g,'i');
+const initials = n => n.split(/\s+/).filter(w=>/^[A-ZÇĞİÖŞÜ]/.test(w)).slice(0,2).map(w=>w[0]).join('');
+
+/* ================= Sample data ================= */
+const STAGES = [
+  {k:'aday',t:'Aday',p:.05},{k:'degerleme',t:'Değerleme',p:.10},{k:'yetki',t:'Yetki',p:.25},
+  {k:'yayinda',t:'Yayında',p:.35},{k:'teklif',t:'Teklif',p:.60},{k:'kapora',t:'Kapora',p:.85},{k:'tapu',t:'Tapu',p:.95}
+];
+const stageIdx = k => STAGES.findIndex(s=>s.k===k);
+const stageName = k => STAGES[stageIdx(k)].t;
+const HUES = [['#6d83b3','#3f4f7a'],['#b08d6a','#6b4f36'],['#6aa6a0','#2f6660'],['#9a7fb8','#57407a'],['#c07c6b','#7a3f33'],['#7ea36b','#43663a'],['#8193a8','#4a5a6e'],['#c4a15a','#7a6130']];
+
+const PORTFOLIOS = [
+  {id:'P-1024',title:'Moda Mah. 3+1, deniz manzaralı',mah:'Moda',ilce:'Kadıköy',tip:'Daire',islem:'Satılık',oda:'3+1',brut:140,net:122,kat:'4 / 6',yas:12,isinma:'Kombi (doğalgaz)',cephe:'Güney-Batı',otopark:'Açık otopark',aidat:1850,esya:'Boş',price:12500000,stage:'yayinda',sides:2,
+   yetki:{ok:true,kalan:23,tur:'Münhasır'},eids:'ok',kvkk:true,dask:'2027',health:82,hue:0,owner:'Hülya Ertem',ownerTel:'0532 *** ** 18',
+   tapu:{ada:'1234',parsel:'5',bb:'9',tur:'Kat mülkiyeti',iskan:true,ipotek:false,haciz:false,kredi:true,imar:'Konut alanı · TAKS 0,30 / KAKS 1,50',kd:'Düşük (2008 sonrası ruhsat)',malik:'2 kişi (%50 / %50)'},
+   sugg:['Kat planı yok — eklenirse +6 puan','Fiyat bölge medyanının %6 üzerinde','Salon fotoğrafı karanlık, yeniden çekin'],
+   ch:[['sahibinden.com',1240,18],['hepsiemlak',610,4],['emlakjet',320,2],['Ofis web sitesi',180,3]],showings:6,offers:1,fb:4.1,priceHist:[[ 'Tem', 13200000],['Ağu',12900000],['Eyl',12500000]]},
+  {id:'P-1031',title:'Caddebostan 2+1, sahile 3 dk',mah:'Caddebostan',ilce:'Kadıköy',tip:'Daire',islem:'Satılık',oda:'2+1',brut:95,net:82,kat:'2 / 5',yas:24,isinma:'Kombi (doğalgaz)',cephe:'Kuzey',otopark:'Yok',aidat:950,esya:'Boş',price:8750000,stage:'yayinda',sides:1,
+   yetki:{ok:true,kalan:6,tur:'Genel'},eids:'ok',kvkk:true,dask:'2026',health:64,hue:1,owner:'Canan Öztürk',ownerTel:'0544 *** ** 71',
+   tapu:{ada:'877',parsel:'12',bb:'4',tur:'Kat mülkiyeti',iskan:true,ipotek:true,haciz:false,kredi:true,imar:'Konut alanı',kd:'Orta (1999 öncesi yapı)',malik:'1 kişi'},
+   sugg:['Fiyat bölge medyanının %18 üzerinde; 21 gündür teklif yok','Açıklama 180 karakter — en az 600 önerilir','Yetki sözleşmesi 6 gün içinde bitiyor'],
+   ch:[['sahibinden.com',2110,9],['hepsiemlak',540,1],['emlakjet',260,0]],showings:3,offers:0,fb:3.2,priceHist:[['Tem',8750000],['Ağu',8750000],['Eyl',8750000]]},
+  {id:'P-1038',title:'Fenerbahçe 4+1 dubleks, bahçeli',mah:'Fenerbahçe',ilce:'Kadıköy',tip:'Daire',islem:'Satılık',oda:'4+1',brut:210,net:180,kat:'Bahçe dubleks',yas:6,isinma:'Yerden ısıtma',cephe:'Güney',otopark:'Kapalı otopark',aidat:4200,esya:'Boş',price:21900000,stage:'yetki',sides:2,
+   yetki:{ok:true,kalan:88,tur:'Münhasır'},eids:'pending',kvkk:true,dask:'2027',health:58,hue:2,owner:'Levent Tan',ownerTel:'0533 *** ** 40',
+   tapu:{ada:'415',parsel:'3',bb:'1',tur:'Kat mülkiyeti',iskan:true,ipotek:false,haciz:false,kredi:true,imar:'Konut alanı',kd:'Düşük',malik:'1 kişi'},
+   sugg:['EİDS onayı bekleniyor — ilan yayına çıkamaz','Profesyonel fotoğraf çekimi planlanmadı','Drone çekimi önerilir (bahçe + deniz)'],
+   ch:[],showings:0,offers:0,fb:null,priceHist:[['Eyl',21900000]]},
+  {id:'P-1042',title:'Ataşehir Barbaros 3+1, site içi',mah:'Barbaros',ilce:'Ataşehir',tip:'Daire',islem:'Satılık',oda:'3+1',brut:155,net:132,kat:'11 / 22',yas:9,isinma:'Merkezi (pay ölçer)',cephe:'Doğu',otopark:'Kapalı otopark',aidat:3100,esya:'Boş',price:11200000,stage:'yayinda',sides:2,
+   yetki:{ok:true,kalan:47,tur:'Münhasır'},eids:'ok',kvkk:true,dask:'2027',health:88,hue:3,owner:'Serkan Uysal',ownerTel:'0535 *** ** 02',
+   tapu:{ada:'3310',parsel:'1',bb:'86',tur:'Kat mülkiyeti',iskan:true,ipotek:false,haciz:false,kredi:true,imar:'Konut + ticaret',kd:'Düşük',malik:'1 kişi'},
+   sugg:['360° sanal tur eklenirse görüntülenme ~%20 artar'],
+   ch:[['sahibinden.com',1680,14],['hepsiemlak',720,6],['emlakjet',410,3],['Ofis web sitesi',150,2]],showings:9,offers:2,fb:4.4,priceHist:[['Tem',11200000],['Ağu',11200000],['Eyl',11200000]]},
+  {id:'P-1045',title:'Göztepe 2+1 kiralık, metroya yakın',mah:'Göztepe',ilce:'Kadıköy',tip:'Daire',islem:'Kiralık',oda:'2+1',brut:90,net:78,kat:'3 / 5',yas:18,isinma:'Kombi (doğalgaz)',cephe:'Batı',otopark:'Yok',aidat:700,esya:'Yarı eşyalı',price:42000,stage:'yayinda',sides:2,
+   yetki:{ok:true,kalan:34,tur:'Genel'},eids:'ok',kvkk:true,dask:'2027',health:76,hue:4,owner:'Nihat Akgül',ownerTel:'0542 *** ** 93',
+   tapu:{ada:'602',parsel:'8',bb:'6',tur:'Kat mülkiyeti',iskan:true,ipotek:false,haciz:false,kredi:false,imar:'Konut alanı',kd:'Orta',malik:'1 kişi'},
+   sugg:['Mutfak fotoğrafı eksik','Kira bölge ortalamasıyla uyumlu'],
+   ch:[['sahibinden.com',980,21],['hepsiemlak',330,5]],showings:5,offers:1,fb:3.9,priceHist:[['Eyl',42000]]},
+  {id:'P-1047',title:'Suadiye 3+1, deniz manzaralı',mah:'Suadiye',ilce:'Kadıköy',tip:'Daire',islem:'Satılık',oda:'3+1',brut:165,net:145,kat:'6 / 8',yas:4,isinma:'Kombi (doğalgaz)',cephe:'Güney',otopark:'Kapalı otopark',aidat:2600,esya:'Boş',price:17400000,stage:'yetki',sides:2,
+   yetki:{ok:false,kalan:0,tur:'Münhasır'},eids:'none',kvkk:false,dask:'2027',health:41,hue:5,owner:'Gülay Sezer',ownerTel:'0530 *** ** 55',
+   tapu:{ada:'209',parsel:'17',bb:'12',tur:'Kat irtifakı',iskan:false,ipotek:false,haciz:false,kredi:false,imar:'Konut alanı',kd:'Düşük',malik:'2 kişi (%70 / %30)'},
+   sugg:['Yetki sözleşmesi imza bekliyor','İskân yok — krediye uygun değil, alıcıya bildirilmeli','KVKK açık rızası eksik'],
+   ch:[],showings:0,offers:0,fb:null,priceHist:[['Eyl',17400000]]},
+  {id:'P-1050',title:'Acıbadem 1+1 kiralık, eşyalı',mah:'Acıbadem',ilce:'Kadıköy',tip:'Daire',islem:'Kiralık',oda:'1+1',brut:60,net:52,kat:'1 / 4',yas:15,isinma:'Kombi (doğalgaz)',cephe:'Doğu',otopark:'Yok',aidat:500,esya:'Eşyalı',price:28500,stage:'degerleme',sides:1,
+   yetki:{ok:false,kalan:0,tur:'Genel'},eids:'none',kvkk:true,dask:'2026',health:35,hue:6,owner:'Oya Kılınç',ownerTel:'0536 *** ** 14',
+   tapu:{ada:'150',parsel:'22',bb:'3',tur:'Kat mülkiyeti',iskan:true,ipotek:false,haciz:false,kredi:false,imar:'Konut alanı',kd:'Orta',malik:'1 kişi'},
+   sugg:['Değerleme raporu hazır değil','Fotoğraf yok'],ch:[],showings:0,offers:0,fb:null,priceHist:[['Eyl',28500]]},
+  {id:'P-1052',title:'Koşuyolu 4+1, bahçeli müstakil',mah:'Koşuyolu',ilce:'Kadıköy',tip:'Villa',islem:'Satılık',oda:'4+1',brut:240,net:205,kat:'Müstakil',yas:30,isinma:'Kombi (doğalgaz)',cephe:'Güney',otopark:'Bahçe içi',aidat:0,esya:'Boş',price:26000000,stage:'teklif',sides:2,
+   yetki:{ok:true,kalan:61,tur:'Münhasır'},eids:'ok',kvkk:true,dask:'2027',health:79,hue:7,owner:'Ahmet & Leyla Kurt',ownerTel:'0532 *** ** 66',
+   tapu:{ada:'88',parsel:'4',bb:'—',tur:'Arsa üzerine müstakil',iskan:true,ipotek:false,haciz:false,kredi:true,imar:'Ayrık nizam 2 kat',kd:'Orta',malik:'2 kişi (%50 / %50)'},
+   sugg:['Teklif ₺24.750.000 — karşı teklif hazırlayın'],ch:[['sahibinden.com',2890,22],['hepsiemlak',990,7]],showings:11,offers:2,fb:4.3,priceHist:[['Tem',27500000],['Ağu',26000000],['Eyl',26000000]]},
+  {id:'P-1055',title:'Küçükbakkalköy 2+1, yeni bina',mah:'Küçükbakkalköy',ilce:'Ataşehir',tip:'Daire',islem:'Satılık',oda:'2+1',brut:98,net:84,kat:'5 / 9',yas:2,isinma:'Kombi (doğalgaz)',cephe:'Güney-Doğu',otopark:'Kapalı otopark',aidat:1400,esya:'Boş',price:6450000,stage:'kapora',sides:2,
+   yetki:{ok:true,kalan:40,tur:'Genel'},eids:'ok',kvkk:true,dask:'2027',health:84,hue:0,owner:'Murat Çelik',ownerTel:'0543 *** ** 29',
+   tapu:{ada:'2021',parsel:'6',bb:'22',tur:'Kat mülkiyeti',iskan:true,ipotek:false,haciz:false,kredi:true,imar:'Konut alanı',kd:'Düşük',malik:'1 kişi'},
+   sugg:['Kapora alındı — tapu randevusu planlayın'],ch:[['sahibinden.com',1320,11]],showings:7,offers:1,fb:4.0,priceHist:[['Eyl',6450000]]},
+  {id:'P-1060',title:'Bostancı 3+1, sahil yolu',mah:'Bostancı',ilce:'Kadıköy',tip:'Daire',islem:'Satılık',oda:'3+1',brut:135,net:118,kat:'3 / 7',yas:14,isinma:'Kombi (doğalgaz)',cephe:'Güney',otopark:'Açık otopark',aidat:1600,esya:'Boş',price:9950000,stage:'tapu',sides:2,
+   yetki:{ok:true,kalan:15,tur:'Münhasır'},eids:'ok',kvkk:true,dask:'2027',health:90,hue:2,owner:'Nur Bilgin',ownerTel:'0534 *** ** 81',
+   tapu:{ada:'512',parsel:'9',bb:'7',tur:'Kat mülkiyeti',iskan:true,ipotek:false,haciz:false,kredi:true,imar:'Konut alanı',kd:'Düşük',malik:'1 kişi'},
+   sugg:['Tapu randevusu bugün 16:30'],ch:[['sahibinden.com',1540,16],['hepsiemlak',480,4]],showings:8,offers:3,fb:4.5,priceHist:[['Eyl',9950000]]},
+  {id:'P-1062',title:'Fenerbahçe 3+1 (FSBO adayı)',mah:'Fenerbahçe',ilce:'Kadıköy',tip:'Daire',islem:'Satılık',oda:'3+1',brut:130,net:112,kat:'2 / 6',yas:20,isinma:'Kombi (doğalgaz)',cephe:'Batı',otopark:'Yok',aidat:1100,esya:'Boş',price:9800000,stage:'aday',sides:2,
+   yetki:{ok:false,kalan:0,tur:'—'},eids:'none',kvkk:false,dask:'—',health:20,hue:4,owner:'Ayşe Korkmaz',ownerTel:'0532 *** ** 07',
+   tapu:{ada:'—',parsel:'—',bb:'—',tur:'Bilinmiyor',iskan:false,ipotek:false,haciz:false,kredi:false,imar:'—',kd:'—',malik:'—'},
+   sugg:['Mal sahibiyle görüşme planlanmadı'],ch:[],showings:0,offers:0,fb:null,priceHist:[['Eyl',9800000]]},
+  {id:'P-1063',title:'Kozyatağı 2+1, site içi (FSBO adayı)',mah:'Kozyatağı',ilce:'Kadıköy',tip:'Daire',islem:'Satılık',oda:'2+1',brut:105,net:90,kat:'7 / 12',yas:11,isinma:'Merkezi',cephe:'Kuzey-Doğu',otopark:'Kapalı otopark',aidat:2200,esya:'Boş',price:7100000,stage:'aday',sides:2,
+   yetki:{ok:false,kalan:0,tur:'—'},eids:'none',kvkk:false,dask:'—',health:18,hue:6,owner:'Tarık Ersoy',ownerTel:'0541 *** ** 36',
+   tapu:{ada:'—',parsel:'—',bb:'—',tur:'Bilinmiyor',iskan:true,ipotek:false,haciz:false,kredi:true,imar:'—',kd:'—',malik:'—'},
+   sugg:['Değerleme randevusu alın'],ch:[],showings:0,offers:0,fb:null,priceHist:[['Eyl',7100000]]}
+];
+const P = id => PORTFOLIOS.find(p=>p.id===id);
+
+const CLIENTS = [
+  {id:'M-01',name:'Zeynep Aydın',tel:'0532 418 22 47',tip:'Alıcı',islem:'Satılık',heat:92,min:11000000,max:13500000,bolge:['Moda','Caddebostan','Fenerbahçe'],oda:['3+1'],kredi:'Ön onay ✔ ₺5.000.000',krediNeed:true,tasinma:'Kasım 2026',must:'Asansör, otopark',nice:'Deniz manzarası',last:0,next:'Bugün 10:30 Moda gösterimi',kaynak:'Referans (Hülya E.)',kvkk:true},
+  {id:'M-02',name:'Burak Şahin',tel:'0535 207 91 03',tip:'Yatırımcı',islem:'Satılık',heat:74,min:6000000,max:9000000,bolge:['Barbaros','Küçükbakkalköy','Kozyatağı'],oda:['2+1','1+1'],kredi:'Nakit',krediNeed:false,tasinma:'Esnek',must:'Kiracılı olabilir',nice:'Metroya yakın',last:3,next:'Perşembe: 2 portföy kataloğu gönder',kaynak:'sahibinden.com',kvkk:true},
+  {id:'M-03',name:'Elif ve Mert Karaca',tel:'0544 663 10 58',tip:'Alıcı',islem:'Satılık',heat:81,min:15000000,max:22000000,bolge:['Suadiye','Fenerbahçe','Caddebostan'],oda:['4+1','3+1'],kredi:'Başvuru aşamasında',krediNeed:true,tasinma:'Ocak 2027',must:'Bahçe veya geniş balkon',nice:'Kapalı otopark',last:1,next:'Cuma: Fenerbahçe dubleks gösterimi',kaynak:'Instagram',kvkk:true},
+  {id:'M-04',name:'Deniz Yurt',tel:'0536 902 44 15',tip:'Kiracı',islem:'Kiralık',heat:66,min:35000,max:45000,bolge:['Göztepe','Moda','Acıbadem'],oda:['2+1'],kredi:'—',krediNeed:false,tasinma:'Ekim 2026',must:'Evcil hayvan kabulü',nice:'Metroya yakın',last:5,next:'Göztepe 2+1 için ikinci görüşme',kaynak:'Web formu',kvkk:true},
+  {id:'M-05',name:'Canan Öztürk',tel:'0544 115 20 71',tip:'Satıcı',islem:'Satılık',heat:55,min:0,max:0,bolge:['Caddebostan'],oda:['2+1'],kredi:'—',krediNeed:false,tasinma:'—',must:'—',nice:'—',last:2,next:'Fiyat revizyonu görüşmesi',kaynak:'FSBO Radar',kvkk:true},
+  {id:'M-06',name:'Hakan Demirel',tel:'0533 780 35 62',tip:'Alıcı',islem:'Satılık',heat:28,min:8000000,max:10500000,bolge:['Bostancı','Suadiye','Göztepe'],oda:['3+1'],kredi:'Ön onay yok',krediNeed:true,tasinma:'2027 ilkbahar',must:'Otopark',nice:'Site içi',last:19,next:'—',kaynak:'Tabela QR',kvkk:false},
+  {id:'M-07',name:'Olga Petrova',tel:'+7 916 *** ** 12',tip:'Yabancı alıcı',islem:'Satılık',heat:70,min:18000000,max:27000000,bolge:['Moda','Fenerbahçe','Koşuyolu'],oda:['3+1','4+1'],kredi:'Nakit (döviz)',krediNeed:false,tasinma:'Aralık 2026',must:'Deniz manzarası',nice:'Bahçe',last:4,next:'Yabancı alıcı kontrol listesini gönder',kaynak:'Ağ/MLS',kvkk:true},
+  {id:'M-08',name:'Selim Aksoy',tel:'0542 377 81 90',tip:'Kiracı',islem:'Kiralık',heat:45,min:25000,max:32000,bolge:['Acıbadem','Koşuyolu'],oda:['1+1'],kredi:'—',krediNeed:false,tasinma:'Kasım 2026',must:'Eşyalı',nice:'—',last:9,next:'Acıbadem 1+1 değerleme sonrası ara',kaynak:'hepsiemlak',kvkk:true}
+];
+const C = id => CLIENTS.find(c=>c.id===id);
+
+const TIMELINE = {
+  'M-01':[['cal','Gösterim planlandı','Moda 3+1 · bugün 10:30 · YGB imzası bekliyor','Bugün 08:10'],['wa','WhatsApp katalog gönderildi','3 portföy · 2 beğeni (Moda 3+1, Barbaros 3+1)','Dün 19:42'],['phone','Arama · 6 dk','Eşi de görmek istiyor, hafta sonu uygun','Dün 17:05'],['file','KVKK açık rıza alındı','OTP ile · v2026.03 metni','12 Eyl'],['userplus','Kayıt oluşturuldu','Referans: Hülya Ertem','10 Eyl']],
+};
+const defaultTimeline = c => [['phone','Arama · 4 dk',`Sonraki adım: ${c.next}`, c.last===0?'Bugün':`${c.last} gün önce`],['mail','E-posta gönderildi','Bölge piyasa bülteni · Eylül','14 Eyl'],['userplus','Kayıt oluşturuldu',`Kaynak: ${c.kaynak}`,'28 Ağu']];
+
+const FSBO = [
+  {id:'F-1',skor:91,ilan:'Fenerbahçe 3+1 "acil"',mah:'Fenerbahçe',ilce:'Kadıköy',tip:'Daire',price:9800000,yas:47,dusus:2,sinyal:['acil','2× fiyat düşüşü'],owner:'Ayşe Korkmaz',gun:3,portal:'sahibinden.com',durum:'Arandı'},
+  {id:'F-2',skor:84,ilan:'Caddebostan 2+1, tayin nedeniyle',mah:'Caddebostan',ilce:'Kadıköy',tip:'Daire',price:7200000,yas:33,dusus:1,sinyal:['tayin'],owner:'Onur Başaran',gun:1,portal:'sahibinden.com',durum:'Yeni'},
+  {id:'F-3',skor:79,ilan:'Suadiye 3+1 bahçe katı',mah:'Suadiye',ilce:'Kadıköy',tip:'Daire',price:13900000,yas:61,dusus:3,sinyal:['yurt dışı','piyasanın %8 altı'],owner:'Pınar Ateş',gun:14,portal:'hepsiemlak',durum:'Görüşüldü'},
+  {id:'F-4',skor:72,ilan:'Göztepe 4+1 dubleks',mah:'Göztepe',ilce:'Kadıköy',tip:'Daire',price:14500000,yas:12,dusus:0,sinyal:[],owner:'Kemal Yıldız',gun:1,portal:'sahibinden.com',durum:'Yeni'},
+  {id:'F-5',skor:68,ilan:'Kozyatağı 2+1 site içi',mah:'Kozyatağı',ilce:'Kadıköy',tip:'Daire',price:7100000,yas:28,dusus:1,sinyal:['hızlı satış'],owner:'Tarık Ersoy',gun:7,portal:'emlakjet',durum:'Değerleme',cakisma:'Selin D. 2 gün önce aradı'},
+  {id:'F-6',skor:64,ilan:'Ataşehir Atatürk Mah. 3+1',mah:'Atatürk',ilce:'Ataşehir',tip:'Daire',price:10400000,yas:40,dusus:1,sinyal:[],owner:'Sevgi Oral',gun:1,portal:'sahibinden.com',durum:'Yeni'},
+  {id:'F-7',skor:58,ilan:'Moda 1+1 butik bina',mah:'Moda',ilce:'Kadıköy',tip:'Daire',price:5200000,yas:9,dusus:0,sinyal:['pazarlık payı var'],owner:'Cem Tuna',gun:1,portal:'sahibinden.com',durum:'Yeni'},
+  {id:'F-8',skor:55,ilan:'Bahariye Cad. dükkân 60 m²',mah:'Moda',ilce:'Kadıköy',tip:'Dükkân',price:11500000,yas:22,dusus:1,sinyal:[],owner:'Rıza Aslan',gun:1,portal:'hepsiemlak',durum:'Yeni'},
+  {id:'F-9',skor:51,ilan:'Acıbadem 2+1',mah:'Acıbadem',ilce:'Kadıköy',tip:'Daire',price:8300000,yas:5,dusus:0,sinyal:[],owner:'Filiz Er',gun:1,portal:'emlakjet',durum:'Yeni'},
+  {id:'F-10',skor:47,ilan:'Bostancı 3+1',mah:'Bostancı',ilce:'Kadıköy',tip:'Daire',price:11800000,yas:3,dusus:0,sinyal:[],owner:'Volkan Işık',gun:1,portal:'sahibinden.com',durum:'Yeni'},
+  {id:'F-11',skor:62,ilan:'Çekmeköy villa, havuzlu',mah:'Merkez',ilce:'Çekmeköy',tip:'Villa',price:24500000,yas:25,dusus:2,sinyal:['acil'],owner:'Engin Polat',gun:1,portal:'sahibinden.com',durum:'Yeni'}
+];
+
+const SHOWINGS = [
+  {id:'G-1',saat:'10:30',sure:'45 dk',tur:'Gösterim',pid:'P-1024',cid:'M-01',ygb:'bekliyor',durum:'planli',not:'Eşi de katılacak. Anahtar kasada.'},
+  {id:'G-2',saat:'12:00',sure:'60 dk',tur:'Portföy alma',pid:'P-1047',cid:null,kisi:'Gülay Sezer',ygb:null,durum:'planli',not:'Yetki sözleşmesi + KVKK rızası imzalatılacak.'},
+  {id:'G-3',saat:'14:00',sure:'45 dk',tur:'Gösterim',pid:'P-1042',cid:'M-02',ygb:'imzali',ygbZaman:'09:12',durum:'planli',not:'Yatırım amaçlı; kira getirisi soruldu.'},
+  {id:'G-4',saat:'16:30',sure:'90 dk',tur:'Tapu randevusu',pid:'P-1060',cid:null,kisi:'Nur Bilgin → Kaan Yalçın',ygb:null,durum:'planli',not:'Kadıköy Tapu Müdürlüğü · DASK ✔ · harç dekontu hazır.'}
+];
+
+const CONVS = [
+  {id:'K-1',name:'Zeynep Aydın',ch:'WhatsApp',t:'08:52',unread:2,pid:'P-1024',msgs:[['o','Günaydın, 10:30 için yoldayım 🙂'],['o','Eşim de geliyor, otopark var mı?'],['me','Günaydın Zeynep Hanım, binanın önünde açık otopark var. Görüşmek üzere!']]},
+  {id:'K-2',name:'sahibinden.com kullanıcısı',ch:'Portal',t:'08:31',unread:1,pid:'P-1031',msgs:[['o','Caddebostan 2+1 hâlâ satılık mı? Pazarlık payı var mı?']]},
+  {id:'K-3',name:'Deniz Yurt',ch:'Web formu',t:'Dün',unread:0,pid:'P-1045',msgs:[['o','Göztepe dairesi için kedim var, sorun olur mu?'],['me','Mal sahibine sordum, küçük evcil hayvan kabul ediyor.']]},
+  {id:'K-4',name:'Hülya Ertem',ch:'E-posta',t:'Dün',unread:0,pid:'P-1024',msgs:[['o','Haftalık rapor için teşekkürler, fiyat konusunu cumartesi konuşalım.']]},
+  {id:'K-5',name:'@kadikoy.evler',ch:'Instagram',t:'Pzt',unread:0,pid:null,msgs:[['o','Moda’da 1+1 kiralık var mı?']]}
+];
+
+const TEMPLATES = [
+  {k:'yetki',t:'Taşınmaz Alım/Satım ve Kiralama Yetki Sözleşmesi',d:'Münhasır / genel seçenekli; hizmet bedeli üst sınır kontrolü dâhil.',v:'v0.4',alan:24},
+  {k:'ygb',t:'Yer Gösterme Belgesi',d:'Randevu oluşturulunca otomatik taslak; OTP ile imza, konum + zaman damgası.',v:'v0.3',alan:11},
+  {k:'kapora',t:'Kapora / Ön Protokol',d:'Kapora tutarı, cayma ve iade koşulları, emanet kaydı.',v:'v0.2',alan:18},
+  {k:'kira',t:'Konut Kira Sözleşmesi',d:'Depozito üst sınırı (3 aylık kira) ve TÜFE artış maddesi kontrolü.',v:'v0.3',alan:31},
+  {k:'kvkk-a',t:'KVKK Aydınlatma Metni',d:'Kişi kartına bağlı; sürüm ve onay zamanı saklanır.',v:'v2026.03',alan:6},
+  {k:'kvkk-r',t:'KVKK Açık Rıza Formu',d:'Pazarlama iletisi ve arama kaydı için ayrı onay kutuları.',v:'v2026.03',alan:7},
+  {k:'teslim',t:'Anahtar & Demirbaş Teslim Tutanağı',d:'Fotoğraflı teslim listesi.',v:'v0.1',alan:14},
+  {k:'cobroke',t:'Ortak Satış (co-broke) Paylaşım Protokolü',d:'Ofisler arası komisyon paylaşımı.',v:'v0.1',alan:12}
+];
+
+const INTEGRATIONS = [
+  {k:'sms',t:'SMS (toplu ileti + OTP)',d:'İYS izin kontrolü ile. Sağlayıcı: kendi hesabınız.',on:false},
+  {k:'wa',t:'WhatsApp Business API',d:'Katalog, şablon mesajlar, birleşik gelen kutusu.',on:false},
+  {k:'ai',t:'Yapay Zekâ (ilan metni, sesli not özeti)',d:'Kendi API anahtarınızla; veriler eğitimde kullanılmaz.',on:false},
+  {k:'esign',t:'e-İmza / Nitelikli elektronik imza',d:'Yetki ve kira sözleşmeleri için.',on:false},
+  {k:'efatura',t:'e-Fatura / e-Arşiv',d:'GİB özel entegratörü üzerinden.',on:false}
+];
+
+const NOTIFS = [
+  ['alert','err','EİDS onayı bekleyen 2 portföy','Fenerbahçe 4+1 ve Suadiye 3+1 yayına çıkamaz.','#/portfoy/P-1038'],
+  ['hourglass','warn','Yetki sözleşmesi 6 gün içinde bitiyor','Caddebostan 2+1 · Canan Öztürk','#/portfoy/P-1031'],
+  ['wa','info','Zeynep Aydın 2 portföyü beğendi','Moda 3+1, Barbaros 3+1','#/musteri/M-01']
+];
+
+/* ================= Derived ================= */
+const commissionOf = p => p.islem==='Kiralık' ? p.price * p.sides : p.price * 0.02 * p.sides;
+const expectedComm = () => PORTFOLIOS.reduce((s,p)=> s + commissionOf(p) * STAGES[stageIdx(p.stage)].p, 0);
+const TARGET = 1000000, REALIZED = 780000;
+
+function matchScore(c, p){
+  if (c.tip==='Satıcı' || c.islem!==p.islem) return null;
+  let s = 0; const r = [];
+  if (p.price>=c.min && p.price<=c.max){ s+=35; r.push(['ok','Bütçe içinde']); }
+  else if (p.price>c.max && p.price<=c.max*1.1){ s+=20; r.push(['warn',`Bütçenin %${Math.round((p.price/c.max-1)*100)} üzerinde`]); }
+  else if (p.price<c.min){ s+=22; r.push(['info','Bütçenin altında']); }
+  else r.push(['err','Bütçe dışı']);
+  if (c.bolge.includes(p.mah)){ s+=30; r.push(['ok',p.mah]); }
+  else if (CLIENTS && PORTFOLIOS.some(x=>c.bolge.includes(x.mah) && x.ilce===p.ilce)){ s+=12; r.push(['warn',`${p.ilce} (tercih dışı mahalle)`]); }
+  else r.push(['err','Bölge dışı']);
+  if (c.oda.includes(p.oda)){ s+=20; r.push(['ok',p.oda]); } else { s+=4; r.push(['err',`${p.oda} (istenen ${c.oda.join('/')})`]); }
+  if (c.krediNeed){ if (p.tapu.kredi){ s+=10; r.push(['ok','Krediye uygun']); } else r.push(['err','Krediye uygun değil']); }
+  else { s+=10; }
+  if (['yayinda','teklif'].includes(p.stage)) s+=5; else r.push(['info','Henüz yayında değil']);
+  return {s:Math.min(99,s), r};
+}
+const matchesFor = c => PORTFOLIOS.map(p=>({p,m:matchScore(c,p)})).filter(x=>x.m && x.m.s>=40).sort((a,b)=>b.m.s-a.m.s);
+
+/* ================= UI helpers ================= */
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+function toast(msg, icon='check'){ const t=document.createElement('div'); t.className='toast'; t.innerHTML=ic(icon)+`<span>${msg}</span>`; $('#toasts').appendChild(t); setTimeout(()=>t.remove(),3200); }
+function badge(kind, text, icon){ return `<span class="badge ${kind}">${icon?ic(icon):''}${text}</span>`; }
+function ph(hue, cap='', tag=''){ const [a,b]=HUES[hue%HUES.length]; return `<div class="ph" style="--h1:${a};--h2:${b}"><svg viewBox="0 0 24 24">${ICONS.logo}</svg>${cap?`<span class="cap">${cap}</span>`:''}${tag?`<span class="tag">${tag}</span>`:''}</div>`; }
+function ring(v, size=84){ const r=36, c=2*Math.PI*r, col = v>=75?'var(--ok)':v>=50?'var(--warn)':'var(--err)';
+  return `<div class="ring" style="width:${size}px;height:${size}px"><svg viewBox="0 0 84 84"><circle cx="42" cy="42" r="${r}" fill="none" stroke="var(--surface-3)" stroke-width="8"/><circle cx="42" cy="42" r="${r}" fill="none" stroke="${col}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c*v/100} ${c}"/></svg><div class="v"><div>${v}<small>/100</small></div></div></div>`; }
+function stageBadge(k){ const m={aday:'',degerleme:'',yetki:'info',yayinda:'ok',teklif:'brand',kapora:'brand',tapu:'warn'}; return badge(m[k]||'',`<span class="sdot"></span>${stageName(k)}`); }
+function eidsBadge(e){ return e==='ok'?badge('ok','EİDS','check'):e==='pending'?badge('warn','EİDS bekliyor','clock'):badge('err','EİDS yok','x'); }
+function yetkiBadge(y){ return !y.ok?badge('err','Yetki yok','x'):y.kalan<=7?badge('warn',`Yetki ${y.kalan} gün`,'hourglass'):badge('ok',`Yetki ${y.kalan} gün`,'check'); }
+function heatBar(h){ const k=h>=70?'err':h>=45?'warn':''; return `<div class="heat"><span style="color:${h>=70?'var(--err)':h>=45?'var(--warn)':'var(--muted)'}">${ic('flame')}</span><div class="progress ${k}"><span style="width:${h}%;${k?'':'background:var(--muted)'}"></span></div><b class="num small">${h}</b></div>`; }
+function priceLabel(p){ return p.islem==='Kiralık' ? `${tl(p.price)}<span class="muted small" style="font-weight:500"> /ay</span>` : tl(p.price); }
+const scoreCls = s => s>=75?'hi':s>=60?'md':'lo';
+
+/* overlays */
+let lastFocus = null;
+function openSheet(title, body, foot=''){
+  lastFocus=document.activeElement;
+  $('#sheet').innerHTML = `<div class="handle"></div><div class="sheet-h"><h2>${title}</h2><button class="icon-btn" data-act="close" aria-label="Kapat">${ic('x')}</button></div><div class="sheet-b">${body}</div>${foot?`<div class="sheet-f">${foot}</div>`:''}`;
+  $('#sheetOv').classList.add('on'); setTimeout(()=>$('#sheet .icon-btn').focus(),50);
+}
+function openModal(title, body, foot='', wide=false){
+  lastFocus=document.activeElement;
+  $('#modal').className = 'modal' + (wide?' wide':'');
+  $('#modal').innerHTML = `<div class="sheet-h"><h2>${title}</h2><button class="icon-btn" data-act="close" aria-label="Kapat">${ic('x')}</button></div><div class="sheet-b">${body}</div>${foot?`<div class="sheet-f">${foot}</div>`:''}`;
+  $('#modalOv').classList.add('on'); setTimeout(()=>$('#modal .icon-btn').focus(),50);
+}
+function closeAll(){ $$('.overlay.on').forEach(o=>o.classList.remove('on')); if(lastFocus&&lastFocus.focus) lastFocus.focus(); }
+function closeModal(){ $('#modalOv').classList.remove('on'); }
+
+/* ================= Navigation ================= */
+const NAV = [
+  ['Günlük',[['kokpit','Kokpit','home'],['takvim','Takvim & Gösterim','cal',4],['mesajlar','Mesajlar','msg',3]]],
+  ['Satış',[['portfoyler','Portföyler','building',PORTFOLIOS.length],['musteriler','Müşteriler','users',CLIENTS.length],['radar','FSBO Radar','radar',12],['eslestirme','Eşleştirme','link'],['islemler','İşlemler','kanban']]],
+  ['Ofis',[['sozlesmeler','Sözleşmeler','file'],['finans','Finans & Komisyon','calc'],['raporlar','Raporlar','chart'],['ayarlar','Ayarlar & Paket','sliders']]]
+];
+const TITLES = {kokpit:'Kokpit',portfoyler:'Portföyler',portfoy:'Portföy Kartı',radar:'FSBO Radar',musteriler:'Müşteriler',musteri:'Müşteri Kartı',eslestirme:'Eşleştirme',islemler:'İşlemler',takvim:'Takvim & Gösterim',mesajlar:'Mesajlar',sozlesmeler:'Sözleşmeler',finans:'Finans & Komisyon',raporlar:'Raporlar',ayarlar:'Ayarlar & Paket'};
+const PARENT = {portfoy:'portfoyler',musteri:'musteriler'};
+function renderNav(){
+  $('#sideNav').innerHTML = NAV.map(([g,items])=>`<div class="nav-group">${g}</div>`+items.map(([k,t,i,c])=>`<a href="#/${k}" data-nav="${k}">${ic(i)}<span>${t}</span>${c?`<span class="cnt">${c}</span>`:''}</a>`).join('')).join('');
+}
+
+/* ================= Views ================= */
+const V = {}; const MOUNT = {};
+
+/* ---- 1. Kokpit ---- */
+V.kokpit = () => {
+  const exp = expectedComm(); const prog = Math.round(REALIZED/TARGET*100);
+  const eidsPending = PORTFOLIOS.filter(p=>['yetki'].includes(p.stage) && p.eids!=='ok');
+  const today = [
+    {i:'phone',k:'ok',t:'Ayşe Korkmaz — FSBO, takip 3. gün',s:'Fenerbahçe 3+1 "acil" · skor 91 · 2× fiyat düşüşü',b:`<button class="btn call sm" data-act="call" data-id="F-1">${ic('phone')}ARA</button>`,pr:'Yüksek'},
+    {i:'cal',k:'info',t:'10:30 Gösterim · Moda 3+1',s:'Zeynep Aydın · Yer Gösterme Belgesi imzası bekliyor',b:`<a class="btn sm" href="#/takvim">${ic('route')}Yol</a>`,pr:'Yüksek'},
+    {i:'pen',k:'brand',t:'Yetki sözleşmesi imza bekliyor',s:'Suadiye 3+1 · Gülay Sezer · OTP bağlantısı dün gönderildi',b:`<button class="btn sm" data-act="resend">${ic('send')}Gönder</button>`,pr:'Yüksek'},
+    {i:'alert',k:'err',t:`${eidsPending.length} portföyün EİDS onayı yok`,s:'Yayına çıkamaz — malike e-Devlet yönlendirmesi gönderin',b:`<a class="btn sm" href="#/portfoy/P-1038">Çöz</a>`,pr:'Engel'},
+    {i:'down',k:'warn',t:'Caddebostan 2+1: fiyat revizyonu önerisi',s:'Bölge medyanının %18 üzerinde · öneri ₺8.225.000 (−%6)',b:`<a class="btn sm" href="#/portfoy/P-1031/performans">İncele</a>`,pr:'Orta'},
+    {i:'hourglass',k:'warn',t:'Yetki sözleşmesi 6 gün içinde bitiyor',s:'Caddebostan 2+1 · Canan Öztürk',b:`<button class="btn sm" data-act="renew">Yenile</button>`,pr:'Orta'},
+    {i:'flame',k:'err',t:'Hakan Demirel 19 gündür aranmadı',s:'Müşteri soğuyor · KVKK açık rızası da eksik',b:`<a class="btn sm" href="#/musteri/M-06">Aç</a>`,pr:'Orta'},
+    {i:'gift',k:'info',t:'Tapu yıl dönümü — Oğuz & Derya Tekin',s:'Göztepe 2+1 · 2025 satışı · tebrik + değer raporu',b:`<button class="btn sm" data-act="toast" data-msg="Tebrik mesajı taslağı WhatsApp'a hazırlandı">Mesaj</button>`,pr:'Düşük'},
+    {i:'key',k:'ok',t:'16:30 Tapu randevusu · Bostancı 3+1',s:'DASK ✔ · harç dekontu ✔ · anahtar teslim tutanağı hazır',b:`<a class="btn sm" href="#/takvim">Detay</a>`,pr:'Yüksek'}
+  ];
+  const stageCounts = STAGES.map(s=>({...s,n:PORTFOLIOS.filter(p=>p.stage===s.k).length,e:PORTFOLIOS.filter(p=>p.stage===s.k).reduce((a,p)=>a+commissionOf(p)*s.p,0)}));
+  const maxE = Math.max(...stageCounts.map(s=>s.e));
+  return `
+  <div class="page-head"><div><h1>Günaydın, Emrullah</h1><p>24 Eylül 2026, Perşembe · Bugün ${today.length} aksiyon, 2'si engel içeriyor</p></div>
+    <div class="row wrap"><button class="btn" data-act="voice">${ic('mic')}Sesle not</button><button class="btn primary" data-act="quick">${ic('plus')}Hızlı ekle</button></div></div>
+  <div class="grid g4" style="margin-bottom:16px">
+    <div class="card kpi"><div class="l">Eylül hedefi</div><div class="v num">${pct(prog)}</div><div class="progress" style="margin-top:8px"><span style="width:${prog}%"></span></div><div class="d muted num">${tl(REALIZED)} / ${tl(TARGET)}</div></div>
+    <div class="card kpi"><div class="l">Beklenen komisyon <span data-tip="Aşama olasılığı × hizmet bedeli (KDV hariç). Aday %5 … Tapu %95.">${ic('info')}</span></div><div class="v num">${tl(exp)}</div><div class="d muted">Olasılık ağırlıklı · ${PORTFOLIOS.length} kayıt</div></div>
+    <div class="card kpi"><div class="l">Aktif portföy</div><div class="v num">${PORTFOLIOS.filter(p=>p.stage==='yayinda').length} <span class="small muted">yayında</span></div><div class="d up">${ic('up')} bu ay +2 yeni yetki</div></div>
+    <div class="card kpi"><div class="l">Sıcak müşteri</div><div class="v num">${CLIENTS.filter(c=>c.heat>=70).length}</div><div class="d down">${ic('flame')} 1 müşteri soğuyor</div></div>
+  </div>
+  <div class="alert info" style="margin-bottom:16px">${ic('sparkle')}<div class="body"><b>Hedefe ulaşmak için</b> bu ay kalan 6 günde <b>2 yeni portföy</b> ve <b>9 gösterim</b> gerekir (geçmiş dönüşüm oranlarınıza göre geri hesaplandı).</div></div>
+  <div class="grid kokpit-grid">
+    <div class="stack" style="gap:16px">
+      <section class="card"><div class="card-h"><h2>Bugün <span class="muted">(${today.length})</span></h2><span class="small muted">Öncelik puanına göre sıralı</span></div>
+        <div class="list">${today.map(a=>`<div class="li"><span class="ic ${a.k}">${ic(a.i)}</span><div class="grow"><div class="t ellipsis">${a.t}</div><div class="s">${a.s}</div></div>${a.b}</div>`).join('')}</div></section>
+      <section class="card"><div class="card-h"><h2>Satış hattı</h2><a href="#/islemler" class="small">Kanban'a git ${ic('right')}</a></div>
+        <div class="card-b"><div class="grid" style="grid-template-columns:repeat(7,minmax(0,1fr));gap:6px">${stageCounts.map(s=>`<a href="#/islemler" style="color:inherit;text-align:center;padding:8px 2px;border-radius:8px;background:var(--surface-2)" data-tip="${s.t}: ${s.n} kayıt · beklenen ${tl(s.e)}"><div class="xs muted ellipsis">${s.t}</div><div class="bold num" style="font-size:18px">${s.n}</div><div style="height:4px;border-radius:9px;background:var(--surface-3);margin:4px 6px 0;overflow:hidden"><div style="height:100%;width:${Math.max(6,s.e/maxE*100)}%;background:var(--chart)"></div></div></a>`).join('')}</div>
+        <p class="small muted" style="margin-top:10px">Çubuk: aşama başına beklenen komisyon (olasılık ağırlıklı).</p></div></section>
+    </div>
+    <div class="stack" style="gap:16px">
+      <section class="card"><div class="card-h"><h2>Uyum uyarıları</h2>${badge('err','4 açık')}</div><div class="list">
+        <div class="li link" data-href="#/portfoy/P-1038"><span class="ic err">${ic('shield')}</span><div class="grow"><div class="t">EİDS doğrulaması eksik</div><div class="s">2 portföy · ilan yayını engellendi</div></div>${ic('right')}</div>
+        <div class="li link" data-href="#/takvim"><span class="ic warn">${ic('pen')}</span><div class="grow"><div class="t">Yer Gösterme Belgesi imzasız</div><div class="s">10:30 Moda gösterimi · kapatılamaz</div></div>${ic('right')}</div>
+        <div class="li link" data-href="#/musteriler"><span class="ic warn">${ic('lock')}</span><div class="grow"><div class="t">KVKK açık rıza eksik</div><div class="s">3 kişi · pazarlama iletisi pasif</div></div>${ic('right')}</div>
+        <div class="li link" data-href="#/portfoy/P-1031"><span class="ic info">${ic('down')}</span><div class="grow"><div class="t">Fiyat piyasanın %15+ üzerinde</div><div class="s">1 portföy · Caddebostan 2+1</div></div>${ic('right')}</div>
+      </div></section>
+      <section class="card"><div class="card-h"><h2>Pazar nabzı · Kadıköy</h2><span class="small muted">Bu hafta</span></div>
+        <div class="card-b"><div class="grid keep3" style="gap:8px;text-align:center">
+          <div><div class="bold num" style="font-size:20px">38</div><div class="xs muted">yeni ilan</div></div>
+          <div><div class="bold num" style="font-size:20px">14</div><div class="xs muted">fiyat düşüşü</div></div>
+          <div><div class="bold num" style="font-size:20px">9</div><div class="xs muted">satıldı / kalktı</div></div></div>
+          <div class="row between" style="margin-top:14px"><span class="small t2">Medyan m² fiyatı (satılık)</span><b class="num">${tl(98400)} <span class="up small">▲ %1,2</span></b></div>
+          <div class="row between" style="margin-top:6px"><span class="small t2">Medyan kira (2+1)</span><b class="num">${tl(41000)} <span class="up small">▲ %2,4</span></b></div>
+          <div class="row between" style="margin-top:6px"><span class="small t2">Ort. ilan yaşı</span><b class="num">52 gün</b></div>
+          <p class="xs muted" style="margin-top:10px">Kaynak: ofis kapanış verisi + izinli ilan verileri (örnek).</p></div></section>
+    </div>
+  </div>`;
+};
+
+/* ---- 2. Portföyler ---- */
+const pf = {q:'',islem:'Tümü',ilce:'Tümü',stage:'Tümü',view:'grid'};
+V.portfoyler = () => `
+  <div class="page-head"><div><h1>Portföyler</h1><p>${PORTFOLIOS.length} kayıt · ${PORTFOLIOS.filter(p=>p.stage==='yayinda').length} yayında</p></div>
+    <div class="row"><button class="btn primary" data-act="form" data-f="portfoy">${ic('plus')}Yeni portföy</button></div></div>
+  <div class="filters">
+    <div class="chips" id="pfIslem">${['Tümü','Satılık','Kiralık'].map(x=>`<button class="chip ${pf.islem===x?'on':''}" data-v="${x}">${x}</button>`).join('')}</div>
+    <input class="input" id="pfQ" placeholder="Ara: başlık, mahalle, ilan no" value="${esc(pf.q)}" style="flex:1;min-width:160px">
+    <select class="input" id="pfIlce" aria-label="İlçe">${['Tümü','Kadıköy','Ataşehir'].map(x=>`<option ${pf.ilce===x?'selected':''}>${x}</option>`).join('')}</select>
+    <select class="input" id="pfStage" aria-label="Aşama"><option>Tümü</option>${STAGES.map(s=>`<option value="${s.k}" ${pf.stage===s.k?'selected':''}>${s.t}</option>`).join('')}</select>
+    <div class="row" style="gap:2px"><button class="icon-btn" data-act="pfview" data-v="grid" aria-label="Kart görünümü" style="${pf.view==='grid'?'color:var(--brand)':''}">${ic('grid')}</button><button class="icon-btn" data-act="pfview" data-v="list" aria-label="Liste görünümü" style="${pf.view==='list'?'color:var(--brand)':''}">${ic('list')}</button></div>
+  </div>
+  <div id="pfOut"></div>`;
+function pfList(){
+  const q = norm(pf.q);
+  const rows = PORTFOLIOS.filter(p => (pf.islem==='Tümü'||p.islem===pf.islem) && (pf.ilce==='Tümü'||p.ilce===pf.ilce) && (pf.stage==='Tümü'||p.stage===pf.stage) && (!q || norm(p.title+' '+p.mah+' '+p.id+' '+p.ilce).includes(q)));
+  if(!rows.length) return `<div class="card card-b muted" style="text-align:center;padding:40px">Filtreye uyan portföy yok.</div>`;
+  if (pf.view==='list') return `<div class="card"><table class="rtable"><thead><tr><th>Portföy</th><th>Fiyat</th><th>Aşama</th><th>Sağlık</th><th>Uyum</th></tr></thead><tbody>${rows.map(p=>`<tr data-href="#/portfoy/${p.id}" style="cursor:pointer"><td data-m="full"><div class="bold">${p.title}</div><div class="xs muted">${p.id} · ${p.ilce}/${p.mah} · ${p.oda} · ${p.brut} m²</div></td><td class="num bold">${priceLabel(p)}</td><td>${stageBadge(p.stage)}</td><td><span class="score ${p.health>=75?'':'md'}" style="width:auto;height:auto;padding:2px 8px;font-size:13px;${p.health>=75?'background:var(--ok-bg);color:var(--ok)':p.health<50?'background:var(--err-bg);color:var(--err)':''}">${p.health}</span></td><td data-m="full"><div class="row wrap" style="gap:4px">${yetkiBadge(p.yetki)}${eidsBadge(p.eids)}</div></td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="pgrid">${rows.map(p=>`<article class="card pcard" data-href="#/portfoy/${p.id}" tabindex="0">${ph(p.hue,`${p.id}`,stageBadge(p.stage))}<div class="b"><div class="row between"><span class="price num">${priceLabel(p)}</span><span class="small bold" style="color:${p.health>=75?'var(--ok)':p.health>=50?'var(--warn)':'var(--err)'}" data-tip="Portföy sağlık skoru">${ic('shield')} ${p.health}</span></div><div class="bold ellipsis">${p.title}</div><div class="small muted">${p.ilce} / ${p.mah} · ${p.oda} · ${p.brut} m² · ${p.kat}</div><div class="row wrap" style="gap:4px;margin-top:2px">${yetkiBadge(p.yetki)}${eidsBadge(p.eids)}${p.kvkk?'':badge('warn','KVKK')}</div></div></article>`).join('')}</div>`;
+}
+MOUNT.portfoyler = () => {
+  const upd = () => { $('#pfOut').innerHTML = pfList(); };
+  upd();
+  $('#pfQ').addEventListener('input', e=>{pf.q=e.target.value; upd();});
+  $('#pfIlce').addEventListener('change', e=>{pf.ilce=e.target.value; upd();});
+  $('#pfStage').addEventListener('change', e=>{pf.stage=e.target.value; upd();});
+  $('#pfIslem').addEventListener('click', e=>{ const b=e.target.closest('.chip'); if(!b) return; pf.islem=b.dataset.v; $$('#pfIslem .chip').forEach(c=>c.classList.toggle('on',c===b)); upd(); });
+};
+
+/* ---- 2b. Portföy detay ---- */
+const PTABS = [['genel','Genel'],['tapu','Tapu & Hukuk'],['medya','Medya'],['evrak','Evrak'],['eslesmeler','Eşleşmeler'],['performans','Performans']];
+V.portfoy = (id, tab='genel') => {
+  const p = P(id); if(!p) return notFound();
+  const ms = CLIENTS.map(c=>({c,m:matchScore(c,p)})).filter(x=>x.m && x.m.s>=40).sort((a,b)=>b.m.s-a.m.s);
+  const yes = v => v ? `<span style="color:var(--ok)">${ic('check')}</span>` : `<span style="color:var(--err)">${ic('x')}</span>`;
+  const t = p.tapu;
+  const tabs = {
+    genel: `<dl class="kv">
+      <div><dt>Tip</dt><dd>${p.tip} · ${p.islem}</dd></div><div><dt>Oda</dt><dd>${p.oda}</dd></div>
+      <div><dt>m² (brüt / net)</dt><dd class="num">${p.brut} / ${p.net}</dd></div><div><dt>Kat</dt><dd>${p.kat}</dd></div>
+      <div><dt>Bina yaşı</dt><dd>${p.yas}</dd></div><div><dt>Isınma</dt><dd>${p.isinma}</dd></div>
+      <div><dt>Cephe</dt><dd>${p.cephe}</dd></div><div><dt>Otopark</dt><dd>${p.otopark}</dd></div>
+      <div><dt>Aidat</dt><dd class="num">${p.aidat?tl(p.aidat):'—'}</dd></div><div><dt>Eşya</dt><dd>${p.esya}</dd></div>
+      <div><dt>m² fiyatı</dt><dd class="num">${p.islem==='Satılık'?tl(p.price/p.brut):'—'}</dd></div><div><dt>Mal sahibi</dt><dd>${p.owner}</dd></div></dl>
+      <h3 style="margin-top:16px">Fiyat geçmişi</h3>
+      <div class="row wrap" style="margin-top:8px">${p.priceHist.map(([m,v],i)=>`<span class="badge ${i===p.priceHist.length-1?'brand':''} num">${m}: ${mTL(v)}</span>`).join(ic('right'))}</div>
+      <h3 style="margin-top:16px">Açıklama <span class="badge info">${ic('sparkle')}AI taslağı</span></h3>
+      <p class="t2" style="margin-top:6px">${p.mah}'nın sakin sokaklarından birinde, ${p.brut} m² ${p.oda} ${p.tip.toLocaleLowerCase('tr')}. ${p.cephe} cephe, ${p.isinma.toLocaleLowerCase('tr')}. ${p.otopark}. Ulaşım ve sosyal olanaklara yürüme mesafesinde.</p>
+      <p class="xs muted" style="margin-top:6px">Mevzuat filtresi: yanıltıcı/ayrımcı ifade bulunamadı · Yetki belgesi no ilan alt bilgisine otomatik eklenir.</p>`,
+    tapu: `<dl class="kv">
+      <div><dt>İl / İlçe / Mahalle</dt><dd>İstanbul / ${p.ilce} / ${p.mah}</dd></div><div><dt>Ada / Parsel</dt><dd class="num">${t.ada} / ${t.parsel}</dd></div>
+      <div><dt>Bağımsız bölüm</dt><dd>${t.bb}</dd></div><div><dt>Tapu türü</dt><dd>${t.tur}</dd></div>
+      <div><dt>İskân</dt><dd>${yes(t.iskan)}</dd></div><div><dt>İpotek</dt><dd>${t.ipotek?badge('warn','Var · banka lehine'):badge('ok','Yok')}</dd></div>
+      <div><dt>Haciz / şerh</dt><dd>${t.haciz?badge('err','Var'):badge('ok','Yok')}</dd></div><div><dt>Krediye uygun</dt><dd>${yes(t.kredi)}</dd></div>
+      <div><dt>İmar durumu</dt><dd>${t.imar}</dd></div><div><dt>Kentsel dönüşüm riski</dt><dd>${t.kd}</dd></div>
+      <div><dt>Malik</dt><dd>${t.malik}</dd></div><div><dt>Vekâlet</dt><dd>Yok</dd></div></dl>
+      ${!t.iskan?`<div class="alert warn" style="margin-top:14px">${ic('alert')}<div class="body"><b>İskân yok:</b> konut kredisi kullanılamaz. Alıcıya yazılı bilgilendirme yapılmalı.</div></div>`:''}
+      ${t.ipotek?`<div class="alert info" style="margin-top:14px">${ic('info')}<div class="body">İpotek kaydı var: tapu günü kapatma yazısı gerekir. Satıcı net hesabına eklendi.</div></div>`:''}
+      <p class="xs muted" style="margin-top:12px">Takyidat sorgusu: 18 Eylül 2026 · malik iletişim bilgisi KVKK rızası ile gösterilir.</p>`,
+    medya: `<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">
+      ${['Salon','Mutfak','Yatak odası','Banyo','Balkon','Cephe'].map((c,i)=>`<div style="aspect-ratio:4/3">${ph(p.hue+i,c,i===0&&p.ch.length?badge('warn','Karanlık'):'')}</div>`).join('')}
+      <div style="aspect-ratio:4/3">${ph(p.hue+3,'Sanal mobilya',badge('info','Temsilidir'))}</div>
+      <div style="aspect-ratio:4/3;border:2px dashed var(--border);border-radius:10px;display:grid;place-items:center;text-align:center" class="small muted">${ic('plus')}<div>Kat planı ekle</div></div></div>
+      <div class="row wrap" style="margin-top:14px"><button class="btn sm" data-act="toast" data-msg="AI ışık/perspektif düzeltmesi kuyruğa alındı">${ic('sparkle')}AI ile düzelt</button><button class="btn sm" data-act="toast" data-msg="360° tur bağlantısı eklendi (örnek)">360° tur</button><button class="btn sm" data-act="toast" data-msg="Reels videosu hazırlanıyor (örnek)">Kısa video üret</button></div>
+      <p class="xs muted" style="margin-top:8px">Sanal düzenlenmiş görseller ilanda zorunlu olarak "temsilidir" etiketiyle yayınlanır. Yüz/plaka otomatik maskelenir.</p>`,
+    evrak: `<div class="list" style="margin:0 -16px">${[
+      ['Tapu fotokopisi',t.ada!=='—'],['Yetki sözleşmesi',p.yetki.ok],['DASK poliçesi',p.dask!=='—'],['Enerji kimlik belgesi (EKB)',p.health>70],['İskân belgesi',t.iskan],['Aidat borcu yok yazısı',p.stage==='tapu'||p.stage==='kapora'],['KVKK aydınlatma + açık rıza',p.kvkk],['Ekspertiz raporu',p.stage==='tapu']
+    ].map(([n,ok])=>`<div class="li"><span class="ic ${ok?'ok':'warn'}">${ic(ok?'check':'clock')}</span><div class="grow"><div class="t">${n}</div><div class="s">${ok?'Evrak kasasında · şifreli':'Eksik — yükleyin veya talep edin'}</div></div>${ok?`<button class="btn sm ghost" data-act="toast" data-msg="${n} indirildi (örnek)">${ic('download')}</button>`:`<button class="btn sm" data-act="toast" data-msg="${n} için malike talep gönderildi">Talep et</button>`}</div>`).join('')}</div>`,
+    eslesmeler: ms.length ? `<div class="list" style="margin:0 -16px">${ms.map(({c,m})=>`<div class="li link" data-href="#/musteri/${c.id}"><span class="avatar">${initials(c.name)}</span><div class="grow"><div class="t">${c.name} <span class="muted small">· ${c.tip}</span></div><div class="row wrap" style="gap:4px;margin-top:4px">${m.r.slice(0,3).map(([k,x])=>badge(k,x)).join('')}</div></div><b class="num" style="color:${m.s>=75?'var(--ok)':'var(--warn)'}">%${m.s}</b></div>`).join('')}</div>` : `<p class="muted">Bu portföye uygun kayıtlı alıcı/kiracı yok. <a href="#/radar">Ağda talep yayınla</a></p>`,
+    performans: p.ch.length ? `<div class="grid g3" style="gap:8px;margin-bottom:14px"><div class="card kpi"><div class="l">Gösterim</div><div class="v num">${p.showings}</div></div><div class="card kpi"><div class="l">Teklif</div><div class="v num">${p.offers}</div></div><div class="card kpi"><div class="l">Ort. geri bildirim</div><div class="v num">${p.fb.toLocaleString('tr-TR')}/5</div></div></div>
+      <table class="rtable"><thead><tr><th>Kanal</th><th class="r">Görüntülenme</th><th class="r">Arama</th><th class="r">Dönüşüm</th></tr></thead><tbody>${p.ch.map(([k,v,a])=>`<tr><td data-m="full" class="bold">${k}</td><td class="r num" data-l="Görüntülenme">${num(v)}</td><td class="r num" data-l="Arama">${a}</td><td class="r num" data-l="Dönüşüm">${pct(a/v*100)}</td></tr>`).join('')}</tbody></table>
+      ${p.id==='P-1031'?`<div class="alert warn" style="margin-top:14px">${ic('down')}<div class="body"><b>Fiyat revizyonu önerisi:</b> Bölgedeki 11 emsalin medyanı ${tl(74200)}/m². Bu portföy ${tl(p.price/p.brut)}/m² (+%18). ${tl(8225000)} ile beklenen satış süresi 64 → 38 gün. <div class="row wrap" style="margin-top:8px"><button class="btn sm" data-act="toast" data-msg="CMA raporu mal sahibine gönderildi">CMA raporunu gönder</button></div></div></div>`:''}`
+      : `<p class="muted">Portföy henüz yayında değil; performans verisi yok.</p>`
+  };
+  return `
+  <div class="page-head" style="align-items:center"><div class="row" style="gap:10px;min-width:0">
+    <a class="icon-btn" href="#/portfoyler" aria-label="Portföylere dön">${ic('left')}</a>
+    <div style="min-width:0"><h1 class="ellipsis">${p.title}</h1><p>${p.id} · İstanbul / ${p.ilce} / ${p.mah} · ${p.brut} m²</p></div></div>
+    <div class="row wrap"><span class="price num" style="font-size:22px">${priceLabel(p)}</span>${stageBadge(p.stage)}</div></div>
+  <div class="pd">
+    <div class="stack" style="gap:16px;min-width:0">
+      <div class="gallery">${ph(p.hue,'1 / 14')}${ph(p.hue+1)}${ph(p.hue+2)}</div>
+      <section class="card"><nav class="tabs" style="padding:0 8px">${PTABS.map(([k,l])=>`<a href="#/portfoy/${p.id}/${k}" class="${tab===k?'on':''}">${l}${k==='eslesmeler'?` (${ms.length})`:''}</a>`).join('')}</nav>
+        <div class="card-b">${tabs[tab]||tabs.genel}</div></section>
+    </div>
+    <aside class="rail">
+      <section class="card card-b"><div class="row" style="gap:14px">${ring(p.health)}<div><h2>Sağlık skoru</h2><p class="small muted">Fotoğraf, açıklama, fiyat uyumu, etkileşim ve güncellik</p></div></div>
+        <div style="margin-top:10px">${p.sugg.map(s=>`<div class="sugg">${ic('alert')}<span>${s}</span></div>`).join('')}</div></section>
+      <section class="card card-b"><h2 style="margin-bottom:6px">Uyum</h2>
+        <div class="comp">${ic(p.yetki.ok?'check':'x')}<span class="grow">Yetki sözleşmesi</span>${p.yetki.ok?(p.yetki.kalan<=7?badge('warn',`${p.yetki.kalan} gün kaldı`):badge('ok',`${p.yetki.kalan} gün kaldı`)):badge('err','Yok')}</div>
+        <div class="comp">${ic('shield')}<span class="grow">EİDS doğrulama</span>${p.eids==='ok'?badge('ok','Onaylı'):p.eids==='pending'?badge('warn','Malik onayı bekliyor'):badge('err','Talep yok')}</div>
+        <div class="comp">${ic('lock')}<span class="grow">KVKK rıza</span>${p.kvkk?badge('ok','Tamam'):badge('warn','Eksik')}</div>
+        <div class="comp">${ic('file')}<span class="grow">DASK</span>${p.dask!=='—'?badge('ok',`${p.dask}'e kadar`):badge('err','Yok')}</div>
+        ${p.eids!=='ok'?`<button class="btn block" style="margin-top:10px" data-act="eids" data-id="${p.id}">${ic('send')}EİDS yetkilendirme talebi gönder</button>`:''}
+        ${p.yetki.ok && p.yetki.kalan<=7?`<button class="btn block" style="margin-top:10px" data-act="renew">${ic('pen')}Yetkiyi yenile</button>`:''}
+      </section>
+      <button class="btn primary lg block" data-act="ownerReport" data-id="${p.id}">${ic('send')}Mal sahibine rapor gönder</button>
+    </aside>
+  </div>`;
+};
+
+/* ---- 3. FSBO Radar ---- */
+const rf = {ilce:'Tümü',tip:'Tümü',min:50};
+V.radar = () => `
+  <div class="page-head"><div><h1>FSBO Radar</h1><p>Sahibinden ilanlar · gece taraması 03:00 · ${FSBO.length} ilan izleniyor</p></div>
+    <div class="row wrap"><button class="btn" data-act="toast" data-msg="Kayıtlı arama bağlantısı eklendi (örnek)">${ic('plus')}Arama bağlantısı ekle</button></div></div>
+  <div class="grid g4" style="margin-bottom:16px">
+    <div class="card kpi"><div class="l">Bugünkü arama sırası</div><div class="v num">12</div><div class="d muted">Skor sırasına göre</div></div>
+    <div class="card kpi"><div class="l">Yeni (24 saat)</div><div class="v num">5</div><div class="d up">${ic('up')} 3 tanesi skor ≥ 70</div></div>
+    <div class="card kpi" style="grid-column:span 2"><div class="l">Dönüşüm hunisi (30 gün)</div><div class="row wrap" style="gap:6px;margin-top:8px">${[['Tespit',86],['Arandı',41],['Görüşüldü',19],['Değerleme',8],['Yetki',4]].map(([k,v],i)=>`${i?ic('right','muted'):''}<span class="small"><b class="num">${v}</b> <span class="muted">${k}</span></span>`).join('')}</div></div>
+  </div>
+  <div class="filters">
+    <select class="input" id="rfIlce" aria-label="Bölge"><option value="Tümü">Bölge: Tümü</option>${['Kadıköy','Ataşehir','Çekmeköy'].map(x=>`<option ${rf.ilce===x?'selected':''}>${x}</option>`).join('')}</select>
+    <select class="input" id="rfTip" aria-label="Tip"><option value="Tümü">Tip: Tümü</option>${['Daire','Villa','Dükkân'].map(x=>`<option ${rf.tip===x?'selected':''}>${x}</option>`).join('')}</select>
+    <label class="row small t2 nw" style="gap:8px;min-width:200px;flex:1;max-width:320px">Skor ≥ <b class="num" id="rfMinV">${rf.min}</b><input type="range" id="rfMin" min="0" max="90" step="5" value="${rf.min}"></label>
+  </div>
+  <div class="card" id="rfOut"></div>
+  <p class="xs muted" style="margin-top:10px">İlanlar platform kullanım koşullarına uygun yöntemlerle (resmî API/iş ortaklığı veya danışmanın kaydettiği arama bağlantıları) izlenir. Aynı mülk farklı sitelerde tek kayıt olarak gösterilir.</p>`;
+function rfTable(){
+  const rows = FSBO.filter(f=>(rf.ilce==='Tümü'||f.ilce===rf.ilce)&&(rf.tip==='Tümü'||f.tip===rf.tip)&&f.skor>=rf.min).sort((a,b)=>b.skor-a.skor);
+  if(!rows.length) return `<div class="card-b muted" style="text-align:center;padding:40px">Filtreye uyan ilan yok.</div>`;
+  return `<div class="tbl-wrap"><table class="rtable"><thead><tr><th>Skor</th><th>İlan</th><th class="r">Fiyat</th><th class="r">İlan yaşı</th><th class="r">Fiyat düşüşü</th><th>Sinyaller</th><th>Durum</th><th></th></tr></thead><tbody>
+  ${rows.map(f=>`<tr><td><span class="score ${scoreCls(f.skor)} num">${f.skor}</span></td><td data-m="sub"><div class="bold">${f.ilan}</div><div class="xs muted">${f.ilce} / ${f.mah} · ${f.portal} · ${f.owner}</div>${f.cakisma?`<div style="margin-top:4px">${badge('warn wrap',`Ekip çakışması: ${f.cakisma}`,'alert')}</div>`:''}</td>
+  <td class="r num bold" data-l="Fiyat" data-m="hide">${mTL(f.price)}</td><td class="r num" data-l="Yaş" data-m="hide">${f.yas} g</td><td class="r num" data-l="Düşüş" data-m="hide">${f.dusus?`${f.dusus} kez`:'–'}</td>
+  <td data-m="full"><div class="row wrap" style="gap:4px"><span class="only-m small bold num">${mTL(f.price)} · ${f.yas} g · ${f.dusus?f.dusus+'× düşüş':'düşüş yok'}</span>${f.sinyal.map(s=>badge(/acil|tayin|yurt/.test(s)?'err':'warn',s)).join('')}</div></td>
+  <td data-m="hide">${badge(f.durum==='Yeni'?'info':f.durum==='Değerleme'?'ok':'',f.durum)}</td>
+  <td class="r"><button class="btn call sm" data-act="call" data-id="${f.id}">${ic('phone')}ARA</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+MOUNT.radar = () => {
+  const upd=()=>{$('#rfOut').innerHTML=rfTable();}; upd();
+  $('#rfIlce').addEventListener('change',e=>{rf.ilce=e.target.value;upd();});
+  $('#rfTip').addEventListener('change',e=>{rf.tip=e.target.value;upd();});
+  $('#rfMin').addEventListener('input',e=>{rf.min=+e.target.value;$('#rfMinV').textContent=rf.min;upd();});
+};
+function openCall(id){
+  const f = FSBO.find(x=>x.id===id); if(!f) return;
+  const cad = [[1,'İlk arama'],[3,'Değerleme raporu gönder'],[7,'Piyasa bülteni'],[14,'Yeniden arama'],[30,'"İlanınız hâlâ yayında" mesajı']];
+  openSheet(`Arama · ${f.owner}`, `
+    <div class="row" style="gap:12px"><span class="score ${scoreCls(f.skor)}">${f.skor}</span><div class="grow"><div class="bold">${f.ilan}</div><div class="small muted">${mTL(f.price)} · ${f.yas} gündür yayında · ${f.dusus} fiyat düşüşü</div></div></div>
+    ${f.cakisma?`<div class="alert warn">${ic('alert')}<div class="body"><b>Ekip çakışması:</b> ${f.cakisma}. Bölge kuralına göre sahiplik Selin D.'de — aramadan önce koordine edin.</div></div>`:''}
+    <a class="btn call lg block" href="tel:05320000000" data-act="dial">${ic('phone')}0532 *** ** ${String(f.skor).padStart(2,'0')} · Ara</a>
+    <div><div class="lbl" style="margin-bottom:6px">Açılış senaryosu</div><div class="script">"Merhaba <b>${f.owner.split(' ')[0]} Hanım/Bey</b>, ben DC Emlak'tan Emrullah. ${f.mah}'daki ilanınızı gördüm. Bu hafta bölgede <b>9 benzer daire</b> satıldı; size ücretsiz, emsalli bir <b>değerleme raporu</b> hazırlayabilirim. Yarın 10 dakikalığına uğrasam uygun olur mu?"</div></div>
+    <div class="stack" style="gap:8px"><div class="lbl">İtiraz karşılama</div>
+      <details class="obj"><summary>${ic('msg')}"Komisyon vermem."</summary><p>"Çok haklısınız, kimse boşuna ödeme yapmak istemez. Komisyonu yalnızca <b>satış olursa</b> ve yasal üst sınır içinde alıyoruz. Profesyonel pazarlamayla ilanlarımız bölge ortalamasından <b>%4 daha yüksek</b> fiyata ve <b>3 hafta daha hızlı</b> satılıyor; bu fark çoğu zaman komisyonu karşılıyor."</p></details>
+      <details class="obj"><summary>${ic('msg')}"Zaten kendim satarım."</summary><p>"Elbette, birçok mal sahibi deniyor. İlanınız ${f.yas} gündür yayında; ortalama satış süresi 52 gün. Size <b>ücretsiz değerleme</b> bırakayım; kendiniz satarken de fiyatı doğru konumlandırmanıza yardımcı olur. Uygun olmazsa hiçbir yükümlülüğünüz yok."</p></details>
+      <details class="obj"><summary>${ic('msg')}"Başka emlakçı da aradı."</summary><p>"Anlıyorum. Farkımız: ilanınız <b>EİDS doğrulamalı</b> yayınlanır, her hafta size görüntülenme ve gösterim raporu gelir, alıcılarımızın kredi ön onayını önceden kontrol ederiz."</p></details>
+    </div>
+    <div><div class="lbl" style="margin-bottom:6px">Takip kadansı · şu an ${f.gun}. gün</div><div class="steps">${cad.map(([d,t])=>`<div class="step ${d<f.gun?'done':d===f.gun?'cur':''}"><span class="n">${d}</span><div><div class="bold small">${d}. gün</div><div class="small muted">${t}</div></div></div>`).join('')}</div>
+    <p class="xs muted">Her adım otomatik görev olarak Kokpit'e düşer.</p></div>`,
+    `<button class="btn" data-act="callres" data-r="Ulaşılamadı — 2 saat sonra tekrar hatırlatılacak">Ulaşılamadı</button><button class="btn" data-act="callres" data-r="Görüşüldü olarak kaydedildi">Görüşüldü</button><button class="btn primary" data-act="callres" data-r="Değerleme randevusu takvime eklendi">Değerleme randevusu</button>`);
+}
+
+/* ---- 4. Müşteriler ---- */
+const cf = {q:'',tip:'Tümü'};
+V.musteriler = () => `
+  <div class="page-head"><div><h1>Müşteriler</h1><p>${CLIENTS.length} kişi · ${CLIENTS.filter(c=>c.last>14).length} kişi soğuyor</p></div><button class="btn primary" data-act="form" data-f="musteri">${ic('userplus')}Yeni müşteri</button></div>
+  <div class="filters"><input class="input" id="cfQ" placeholder="İsim, telefon, bölge" style="flex:1;min-width:160px" value="${esc(cf.q)}">
+    <div class="chips" id="cfTip">${['Tümü','Alıcı','Kiracı','Satıcı','Yatırımcı','Yabancı alıcı'].map(x=>`<button class="chip ${cf.tip===x?'on':''}" data-v="${x}">${x}</button>`).join('')}</div></div>
+  <div class="card" id="cfOut"></div>`;
+function cfTable(){
+  const q=norm(cf.q);
+  const rows = CLIENTS.filter(c=>(cf.tip==='Tümü'||c.tip===cf.tip)&&(!q||norm(c.name+' '+c.tel.replace(/\s/g,'')+' '+c.tel+' '+c.bolge.join(' ')).includes(q))).sort((a,b)=>b.heat-a.heat);
+  if(!rows.length) return `<div class="card-b muted" style="text-align:center;padding:40px">Sonuç yok.</div>`;
+  return `<table class="rtable"><thead><tr><th>Kişi</th><th>Isı</th><th>Arayış</th><th>Son temas</th><th>Sonraki adım</th></tr></thead><tbody>${rows.map(c=>`<tr data-href="#/musteri/${c.id}" style="cursor:pointer"><td><span class="avatar">${initials(c.name)}</span></td><td data-m="sub"><div class="bold">${c.name}</div><div class="xs muted">${c.tip} · ${c.tel}${c.kvkk?'':' · '}${c.kvkk?'':`<span style="color:var(--warn)">KVKK rıza eksik</span>`}</div></td><td>${heatBar(c.heat)}</td>
+  <td data-m="full" class="small">${c.tip==='Satıcı'?'Portföy sahibi':`${c.islem==='Kiralık'?tl(c.min)+'–'+tl(c.max)+'/ay':mTL(c.min)+' – '+mTL(c.max)} · ${c.oda.join('/')} · ${c.bolge.join(', ')}`}</td>
+  <td data-m="full" class="small" data-l="Son temas:">${c.last>14?badge('err',`${c.last} gün önce · soğuyor`):c.last===0?badge('ok','Bugün'):`${c.last} gün önce`}</td><td data-m="hide" class="small t2">${c.next}</td></tr>`).join('')}</tbody></table>`;
+}
+MOUNT.musteriler = () => {
+  const upd=()=>{$('#cfOut').innerHTML=cfTable();}; upd();
+  $('#cfQ').addEventListener('input',e=>{cf.q=e.target.value;upd();});
+  $('#cfTip').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;cf.tip=b.dataset.v;$$('#cfTip .chip').forEach(x=>x.classList.toggle('on',x===b));upd();});
+};
+V.musteri = id => {
+  const c = C(id); if(!c) return notFound();
+  const tl_ = TIMELINE[id] || defaultTimeline(c);
+  const ms = matchesFor(c).slice(0,4);
+  return `
+  <div class="page-head" style="align-items:center"><div class="row" style="gap:12px;min-width:0"><a class="icon-btn" href="#/musteriler" aria-label="Müşterilere dön">${ic('left')}</a><span class="avatar lg">${initials(c.name)}</span><div style="min-width:0"><h1 class="ellipsis">${c.name}</h1><p>${c.tip} · ${c.tel} · Kaynak: ${c.kaynak}</p></div></div>
+    <div class="row wrap"><a class="btn call" href="tel:0" data-act="dial">${ic('phone')}Ara</a><button class="btn" data-act="toast" data-msg="WhatsApp sohbeti açıldı (örnek)">${ic('wa')}WhatsApp</button><a class="btn primary" href="#/eslestirme/${c.id}">${ic('link')}Eşleştir</a></div></div>
+  ${c.last>14?`<div class="alert err" style="margin-bottom:16px">${ic('flame')}<div class="body"><b>Müşteri soğuyor:</b> ${c.last} gündür temas yok. "Sonraki adım" zorunlu alanı boş.</div></div>`:''}
+  ${!c.kvkk?`<div class="alert warn" style="margin-bottom:16px">${ic('lock')}<div class="body"><b>KVKK açık rıza eksik:</b> pazarlama iletisi ve arama kaydı pasif. <button class="btn sm" data-act="toast" data-msg="Açık rıza formu OTP ile gönderildi" style="margin-left:6px">Rıza iste</button></div></div>`:''}
+  <div class="grid kokpit-grid">
+    <div class="stack" style="gap:16px">
+      <section class="card"><div class="card-h"><h2>Arayış profili</h2>${heatBar(c.heat)}</div><div class="card-b"><dl class="kv">
+        <div><dt>Bütçe</dt><dd class="num">${c.tip==='Satıcı'?'—':c.islem==='Kiralık'?`${tl(c.min)} – ${tl(c.max)} /ay`:`${mTL(c.min)} – ${mTL(c.max)}`}</dd></div><div><dt>Bölge</dt><dd>${c.bolge.join(', ')}</dd></div>
+        <div><dt>Oda</dt><dd>${c.oda.join(' / ')}</dd></div><div><dt>Kredi / ödeme</dt><dd>${/✔/.test(c.kredi)?badge('ok',c.kredi):c.kredi}</dd></div>
+        <div><dt>Olmazsa olmaz</dt><dd>${c.must}</dd></div><div><dt>Olsa iyi olur</dt><dd>${c.nice}</dd></div>
+        <div><dt>Taşınma</dt><dd>${c.tasinma}</dd></div><div><dt>Sonraki adım</dt><dd>${c.next}</dd></div></dl>
+        ${c.tip==='Yabancı alıcı'?`<div class="alert info" style="margin-top:12px">${ic('info')}<div class="body"><b>Yabancı Alıcı Kontrol Listesi:</b> değerleme raporu, döviz alım belgesi, yeminli tercüman, askerî bölge sorgusu.</div></div>`:''}</div></section>
+      <section class="card"><div class="card-h"><h2>Eşleşen portföyler</h2><a class="small" href="#/eslestirme/${c.id}">Tümü ${ic('right')}</a></div><div class="list">${ms.length?ms.map(({p,m})=>`<div class="li link" data-href="#/portfoy/${p.id}"><div style="width:56px;height:42px;flex:none">${ph(p.hue)}</div><div class="grow"><div class="t ellipsis">${p.title}</div><div class="s num">${priceLabel(p)}</div></div><b class="num" style="color:${m.s>=75?'var(--ok)':'var(--warn)'}">%${m.s}</b></div>`).join(''):'<div class="li muted">Uygun portföy yok — FSBO Radar\'da hedefli av başlatın.</div>'}</div></section>
+    </div>
+    <section class="card"><div class="card-h"><h2>Zaman tüneli</h2><button class="btn sm" data-act="voice">${ic('mic')}Sesle not</button></div><div class="card-b"><div class="steps">${tl_.map(([i,t,s,d])=>`<div class="step"><span class="n" style="background:var(--brand-soft);color:var(--brand)">${ic(i)}</span><div class="grow"><div class="row between"><b class="small">${t}</b><span class="xs muted">${d}</span></div><div class="small muted">${s}</div></div></div>`).join('')}</div></div></section>
+  </div>`;
+};
+
+/* ---- 5. Eşleştirme ---- */
+const sel = new Set();
+V.eslestirme = (cid='M-01') => {
+  const buyers = CLIENTS.filter(c=>c.tip!=='Satıcı');
+  const c = C(cid) || buyers[0];
+  const ms = matchesFor(c);
+  sel.clear(); ms.filter(x=>x.m.s>=75).slice(0,3).forEach(x=>sel.add(x.p.id));
+  return `
+  <div class="page-head"><div><h1>Eşleştirme</h1><p>Müşteri seçin → ağırlıklı puanla sıralanmış portföyler</p></div></div>
+  <div class="chips" style="margin-bottom:16px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px">${buyers.map(b=>`<a class="chip ${b.id===c.id?'on':''}" href="#/eslestirme/${b.id}">${b.name}</a>`).join('')}</div>
+  <div class="grid kokpit-grid">
+    <section class="card"><div class="card-h"><h2>${c.name} için ${ms.length} portföy</h2><span class="small muted">Ofis + ağ portföyleri</span></div>
+      <div class="list">${ms.length?ms.map(({p,m})=>`<label class="li" style="cursor:pointer;align-items:flex-start"><input type="checkbox" class="msel" value="${p.id}" ${sel.has(p.id)?'checked':''} style="margin-top:12px;width:18px;height:18px;accent-color:var(--brand)"><div style="width:72px;height:54px;flex:none">${ph(p.hue)}</div>
+        <div class="grow"><div class="row between" style="align-items:flex-start"><div style="min-width:0"><a class="t" href="#/portfoy/${p.id}" style="color:inherit">${p.title}</a><div class="s num">${priceLabel(p)} · ${p.brut} m² · ${stageName(p.stage)}</div></div>
+          <div style="text-align:right;flex:none"><div class="bold num" style="font-size:18px;color:${m.s>=75?'var(--ok)':m.s>=60?'var(--warn)':'var(--muted)'}">%${m.s}</div><div class="xs muted">uyum</div></div></div>
+          <div class="row wrap" style="gap:4px;margin-top:6px">${m.r.map(([k,x])=>badge(k,x,k==='ok'?'check':k==='err'?'x':'')).join('')}</div></div></label>`).join(''):`<div class="li"><div class="grow"><div class="t">Bu alıcı için ağda uygun mülk yok</div><div class="s">Ters eşleştirme: FSBO Radar ve sfer listesinde hedefli portföy avı başlatın.</div></div><a class="btn sm" href="#/radar">Radar</a></div>`}</div></section>
+    <aside class="stack" style="gap:16px">
+      <section class="card card-b"><h2>Arayış özeti</h2><p class="small t2" style="margin-top:6px">${c.islem==='Kiralık'?`${tl(c.min)}–${tl(c.max)}/ay`:`${mTL(c.min)} – ${mTL(c.max)}`} · ${c.oda.join('/')} · ${c.bolge.join(', ')} · ${c.kredi}</p>
+        <div class="lbl" style="margin-top:12px">Puanlama ağırlıkları</div>
+        ${[['Bütçe / fiyat toleransı (±%10)',35],['Konum',30],['Oda (sert filtre)',20],['Kredi uygunluğu',10],['Yayında',5]].map(([k,v])=>`<div class="row between small" style="margin-top:6px"><span class="t2">${k}</span><b class="num">${v}</b></div>`).join('')}</section>
+      <section class="card card-b"><h2>Katalog paylaş</h2><p class="small muted" style="margin:6px 0 12px">Seçilen mülkler markalı mini katalog linki olarak gönderilir; müşteri beğen/beğenme yapar.</p>
+        <button class="btn primary lg block" data-act="catalog" data-id="${c.id}" id="catBtn">${ic('wa')}WhatsApp ile katalog gönder (<span id="selN">${sel.size}</span>)</button></section>
+    </aside>
+  </div>`;
+};
+MOUNT.eslestirme = () => { $$('.msel').forEach(cb=>cb.addEventListener('change',()=>{ cb.checked?sel.add(cb.value):sel.delete(cb.value); $('#selN').textContent=sel.size; })); };
+
+/* ---- 6. İşlemler (Kanban) ---- */
+V.islemler = () => `
+  <div class="page-head"><div><h1>İşlemler</h1><p>Sürükle-bırak ile aşama değiştirin · her geçişte Uyum Motoru çalışır</p></div>
+    <div class="row wrap small">${badge('err','ENGELLE','x')}${badge('warn','UYAR','alert')}${badge('ok','GEÇ','check')}</div></div>
+  <div class="board" id="board">${STAGES.map(s=>{ const items=PORTFOLIOS.filter(p=>p.stage===s.k); const e=items.reduce((a,p)=>a+commissionOf(p)*s.p,0);
+    return `<div class="col" data-stage="${s.k}"><div class="col-h"><b>${s.t} <span class="n">(${items.length})</span></b><span class="xs muted num" data-tip="Beklenen komisyon (olasılık %${Math.round(s.p*100)})">${mTL(e)}</span></div>
+    <div class="col-b">${items.map(kcard).join('')||'<div class="xs muted" style="text-align:center;padding:20px 0">Buraya sürükleyin</div>'}</div></div>`; }).join('')}</div>
+  <p class="xs muted">Kural seti v2026.09 · "Yayında" ve sonrası: Yetki sözleşmesi + EİDS zorunlu · "Tapu": DASK zorunlu. Mobilde kartlara dokunarak aşama seçebilirsiniz.</p>`;
+function kcard(p){ return `<div class="kcard" draggable="true" data-id="${p.id}" tabindex="0" role="button" aria-label="${esc(p.title)}"><div class="bold small">${p.title}</div><div class="row between"><span class="num small bold">${p.islem==='Kiralık'?tl(p.price)+'/ay':mTL(p.price)}</span><span class="xs muted">${p.id}</span></div><div class="flags">${yetkiBadge(p.yetki)}${eidsBadge(p.eids)}</div></div>`; }
+MOUNT.islemler = () => {
+  const board = $('#board');
+  board.addEventListener('dragstart', e=>{ const c=e.target.closest('.kcard'); if(!c) return; c.classList.add('dragging'); e.dataTransfer.setData('text/plain', c.dataset.id); e.dataTransfer.effectAllowed='move'; });
+  board.addEventListener('dragend', e=>{ const c=e.target.closest('.kcard'); if(c) c.classList.remove('dragging'); $$('.col.over').forEach(x=>x.classList.remove('over')); });
+  $$('.col',board).forEach(col=>{
+    col.addEventListener('dragover', e=>{ e.preventDefault(); col.classList.add('over'); });
+    col.addEventListener('dragleave', e=>{ if(!col.contains(e.relatedTarget)) col.classList.remove('over'); });
+    col.addEventListener('drop', e=>{ e.preventDefault(); col.classList.remove('over'); tryMove(e.dataTransfer.getData('text/plain'), col.dataset.stage); });
+  });
+  board.addEventListener('click', e=>{ const c=e.target.closest('.kcard'); if(c) openDeal(c.dataset.id); });
+  board.addEventListener('keydown', e=>{ const c=e.target.closest('.kcard'); if(c && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); openDeal(c.dataset.id);} });
+};
+function openDeal(id){
+  const p=P(id);
+  openSheet(p.title, `<div style="height:140px">${ph(p.hue)}</div>
+    <div class="row between"><span class="price num">${priceLabel(p)}</span>${stageBadge(p.stage)}</div>
+    <div class="row wrap" style="gap:4px">${yetkiBadge(p.yetki)}${eidsBadge(p.eids)}${p.dask!=='—'?badge('ok','DASK'):badge('err','DASK yok')}</div>
+    <div class="lbl">Aşamaya taşı</div>
+    <div class="chips">${STAGES.map(s=>`<button class="chip ${s.k===p.stage?'on':''}" data-act="move" data-id="${p.id}" data-stage="${s.k}">${s.t}</button>`).join('')}</div>
+    <p class="small muted">Beklenen komisyon: <b class="num">${tl(commissionOf(p)*STAGES[stageIdx(p.stage)].p)}</b> (olasılık %${Math.round(STAGES[stageIdx(p.stage)].p*100)})</p>`,
+    `<a class="btn" href="#/portfoy/${p.id}">Portföy kartı</a>`);
+}
+function tryMove(id, to){
+  const p=P(id); if(!p||p.stage===to) return;
+  const need=[];
+  if (stageIdx(to)>=stageIdx('yayinda')){
+    if(!p.yetki.ok) need.push({k:'yetki',t:'Yazılı yetki sözleşmesi yok',d:'Taşınmaz Ticareti Yönetmeliği: mal sahibiyle yazılı yetki sözleşmesi olmadan ilan/pazarlama yapılamaz.',fix:'Yetkiyi OTP ile imzaya gönder'});
+    if(p.eids!=='ok') need.push({k:'eids',t: p.eids==='pending'?'EİDS: malik e-Devlet onayı bekleniyor':'EİDS yetkilendirme talebi yapılmamış',d:'İlan yayımlanmadan önce malik/yetki ilişkisi e-Devlet üzerinden doğrulanmalı.',fix:'Malike EİDS yönlendirmesi gönder'});
+  }
+  if (need.length){
+    closeAll();
+    openModal(`${ic('shield')} Uyum Motoru — İşlem engellendi`, `
+      <div class="alert err">${ic('x')}<div class="body"><b>ENGELLE:</b> "${p.title}" → <b>${stageName(to)}</b> geçişi için ${need.length} zorunlu adım eksik.</div></div>
+      ${need.map(n=>`<div class="card card-b"><div class="bold">${n.t}</div><p class="small muted" style="margin:4px 0 10px">${n.d}</p><div class="row wrap"><button class="btn sm primary" data-act="fix" data-k="${n.k}" data-id="${p.id}">${ic('send')}${n.fix}</button><button class="btn sm ghost" data-act="fixsim" data-k="${n.k}" data-id="${p.id}">Prototip: tamamlandı say</button></div></div>`).join('')}
+      <p class="xs muted">Kural: TTY-İLAN-01 · EİDS-02 · kural seti v2026.09. Engellenen deneme denetim kaydına yazıldı.</p>`,
+      `<button class="btn" data-act="close">Kapat</button><button class="btn primary" data-act="retry" data-id="${p.id}" data-stage="${to}">Tekrar dene</button>`);
+    return;
+  }
+  if (to==='tapu' && p.dask==='—'){
+    openModal('Uyum Motoru — Uyarı', `<div class="alert warn">${ic('alert')}<div class="body"><b>UYAR:</b> DASK poliçesi yok. Tapu işlemi için zorunludur.</div></div>`, `<button class="btn" data-act="close">Vazgeç</button><button class="btn primary" data-act="forcemove" data-id="${p.id}" data-stage="${to}">Gerekçe ile devam et</button>`);
+    return;
+  }
+  doMove(p,to);
+}
+function doMove(p,to){ p.stage=to; closeAll(); if(route().name==='islemler') render(); toast(`${p.id} → ${stageName(to)} · GEÇ · kural v2026.09 kayda eklendi`); }
+
+/* ---- 7. Takvim ---- */
+V.takvim = () => {
+  const days=[['Pzt',21],['Sal',22],['Çar',23],['Per',24],['Cum',25],['Cmt',26],['Paz',27]];
+  return `
+  <div class="page-head"><div><h1>Takvim & Gösterim</h1><p>Perşembe, 24 Eylül · ${SHOWINGS.length} randevu · tahmini rota 18,4 km</p></div>
+    <div class="row wrap"><button class="btn" data-act="toast" data-msg="Rota optimize edildi: 3 dk tasarruf">${ic('route')}Rotayı optimize et</button><button class="btn primary" data-act="form" data-f="gosterim">${ic('plus')}Randevu</button></div></div>
+  <div class="days" style="margin-bottom:16px">${days.map(([d,n])=>`<button class="day ${n===24?'on':''}" data-act="${n===24?'':'toast'}" data-msg="Prototipte yalnızca bugün dolu"><span>${d}</span><b>${n}</b></button>`).join('')}</div>
+  <div class="grid kokpit-grid"><div class="agenda">${SHOWINGS.map(apptCard).join('')}</div>
+    <aside class="stack" style="gap:16px">
+      <section class="card card-b"><h2>Yer Gösterme Belgesi</h2><p class="small t2" style="margin-top:6px">Randevu oluşturulunca taslak hazırlanır; müşteri telefonunda OTP ile imzalar; konum + zaman damgası eklenir. <b>Belge olmadan gösterim tamamlanamaz.</b></p></section>
+      <section class="card card-b"><h2>Güvenlik</h2><p class="small t2" style="margin:6px 0 12px">Tek başına gösterimde "Güvendeyim" check-in; süre aşılırsa takım liderine alarm.</p><button class="btn block" data-act="toast" data-msg="Güvendeyim check-in: 45 dk sayaç başladı">${ic('shield')}Güvendeyim check-in</button></section>
+      <section class="card card-b"><h2>Anahtarlar</h2><div class="row between small" style="margin-top:8px"><span>Moda 3+1</span>${badge('ok','Ofis kasası')}</div><div class="row between small" style="margin-top:6px"><span>Barbaros 3+1</span>${badge('info','Emrullah K.')}</div></section>
+    </aside></div>`;
+};
+function apptCard(s){
+  const p=P(s.pid); const c=s.cid?C(s.cid):null;
+  const col = s.tur==='Tapu randevusu'?'var(--warn)':s.tur==='Portföy alma'?'var(--info)':'var(--brand)';
+  let ygb='';
+  if (s.ygb){ ygb = s.ygb==='imzali' ? `<div class="alert ok" style="padding:8px 10px">${ic('check')}<div class="body small"><b>Yer Gösterme Belgesi imzalı</b> · ${s.ygbZaman} · 40,987 N 29,027 E · OTP ✔</div></div>`
+    : `<div class="alert warn" style="padding:8px 10px">${ic('pen')}<div class="body small"><b>Yer Gösterme Belgesi imza bekliyor.</b> Gösterim bu belge olmadan tamamlanamaz.</div></div>`; }
+  const done = s.durum==='tamamlandi';
+  return `<div class="appt" id="appt-${s.id}"><div class="tm num">${s.saat}<small>${s.sure}</small></div><div class="card card-b stack" style="--c:${col};gap:10px">
+    <div class="row between" style="align-items:flex-start"><div style="min-width:0"><div class="xs bold" style="color:${col};text-transform:uppercase;letter-spacing:.04em">${s.tur}</div><a class="bold" href="#/portfoy/${p.id}" style="color:inherit">${p.title}</a><div class="small muted">${c?c.name:s.kisi} · ${p.ilce}/${p.mah}</div></div>${done?badge('ok','Tamamlandı','check'):badge('','Planlı')}</div>
+    ${ygb}<p class="small t2">${s.not}</p>
+    <div class="row wrap">${s.ygb==='bekliyor'?`<button class="btn sm primary" data-act="ygb" data-id="${s.id}">${ic('pen')}Belgeyi imzaya gönder</button>`:''}
+      ${s.tur==='Gösterim' && !done?`<button class="btn sm ${s.ygb==='imzali'?'ok':''}" data-act="complete" data-id="${s.id}" ${s.ygb==='imzali'?'':'aria-disabled="true" style="opacity:.55"'}>${ic('check')}Tamamlandı işaretle</button>`:''}
+      ${done?`<button class="btn sm" data-act="toast" data-msg="2 dk'lık geri bildirim anketi müşteriye gönderildi">Geri bildirim iste</button>`:''}
+      <button class="btn sm ghost" data-act="toast" data-msg="Navigasyon açıldı (örnek)">${ic('route')}Yol tarifi</button></div></div></div>`;
+}
+function ygbFlow(id, step=1){
+  const s=SHOWINGS.find(x=>x.id===id); const p=P(s.pid); const c=C(s.cid);
+  if(step===1) openModal('Yer Gösterme Belgesi', `
+    <div class="doc">İşbu belge ile <span class="f">${c.name}</span> (T.C. <span class="f">*******4821</span>), <span class="f">${p.ilce} / ${p.mah}, Ada ${p.tapu.ada} Parsel ${p.tapu.parsel}</span> adresindeki taşınmazın <span class="f">24.09.2026 ${s.saat}</span> tarihinde <span class="f">DC Emlak — Yetki Belgesi No 3401-2231</span> tarafından kendisine gösterildiğini kabul eder.</div>
+    <div class="row between small"><span class="muted">İmza yöntemi</span><b>SMS-OTP · ${c.tel.slice(0,4)} *** ** ${c.tel.slice(-2)}</b></div>
+    <div class="row between small"><span class="muted">Eklenecek</span><span>Konum + zaman damgası</span></div>`,
+    `<button class="btn" data-act="close">Vazgeç</button><button class="btn primary" data-act="ygb2" data-id="${id}">${ic('send')}SMS kodu gönder</button>`);
+  if(step===2) openModal('OTP ile imza', `<p class="t2">Müşterinin telefonuna 6 haneli kod gönderildi. Müşteri kodu kendi ekranından onaylar veya size söyler.</p>
+    <div class="otp" id="otp">${[0,1,2,3,4,5].map(i=>`<input inputmode="numeric" maxlength="1" aria-label="Kod ${i+1}. hane">`).join('')}</div>
+    <p class="xs muted" style="text-align:center">Prototip kodu: <b class="num">482913</b> · <a href="#" data-act="otpfill">otomatik doldur</a></p><div id="otpErr"></div>`,
+    `<button class="btn" data-act="close">Vazgeç</button><button class="btn primary" data-act="ygb3" data-id="${id}">Doğrula ve imzala</button>`);
+  if(step===2) setTimeout(()=>{ const ins=$$('#otp input'); ins[0].focus(); ins.forEach((inp,i)=>{ inp.addEventListener('input',()=>{ inp.value=inp.value.replace(/\D/g,''); if(inp.value&&ins[i+1]) ins[i+1].focus(); }); inp.addEventListener('keydown',e=>{ if(e.key==='Backspace'&&!inp.value&&ins[i-1]) ins[i-1].focus(); }); }); },60);
+}
+
+/* ---- 8. Sözleşmeler ---- */
+V.sozlesmeler = () => `
+  <div class="page-head"><div><h1>Sözleşmeler</h1><p>Şablon kütüphanesi · akıllı alanlar portföy/müşteri kartından otomatik dolar</p></div></div>
+  <div class="alert warn" style="margin-bottom:16px">${ic('alert')}<div class="body"><b>Tüm şablonlar taslaktır — hukuk onayı bekliyor.</b> Canlı kullanımdan önce hukuk danışmanı tarafından güncel mevzuata göre onaylanmalıdır.</div></div>
+  <div class="grid g3">${TEMPLATES.map(t=>`<article class="card card-b stack" style="gap:8px"><div class="row between"><span class="ic brand" style="width:36px;height:36px;border-radius:9px;display:grid;place-items:center">${ic('file')}</span>${badge('warn','Taslak – hukuk onayı bekliyor')}</div>
+    <h3>${t.t}</h3><p class="small muted grow">${t.d}</p><div class="row between xs muted"><span>${t.v} · ${t.alan} akıllı alan</span></div>
+    <div class="row"><button class="btn sm" data-act="tpl" data-k="${t.k}">${ic('eye')}Önizle</button><button class="btn sm ghost" data-act="toast" data-msg="Taslak şablonlar imzaya gönderilemez (hukuk onayı bekliyor)">${ic('send')}İmzaya gönder</button></div></article>`).join('')}</div>
+  <section class="card" style="margin-top:16px"><div class="card-h"><h2>İmza bekleyenler</h2></div><div class="list">
+    <div class="li"><span class="ic warn">${ic('pen')}</span><div class="grow"><div class="t">Yetki Sözleşmesi · Suadiye 3+1</div><div class="s">Gülay Sezer · OTP gönderildi dün 18:20</div></div><button class="btn sm" data-act="resend">Hatırlat</button></div>
+    <div class="li"><span class="ic warn">${ic('pen')}</span><div class="grow"><div class="t">Yer Gösterme Belgesi · Moda 3+1</div><div class="s">Zeynep Aydın · bugün 10:30</div></div><a class="btn sm" href="#/takvim">Aç</a></div>
+    <div class="li"><span class="ic ok">${ic('check')}</span><div class="grow"><div class="t">Kapora / Ön Protokol · Küçükbakkalköy 2+1</div><div class="s">İmzalandı 21 Eyl · evrak kasasında</div></div></div></div></section>`;
+
+/* ---- 9. Finans ---- */
+const PARAMS = {satisOran:2, kdv:20, tapuHarci:2, doner:4250, dask:2400, depozitoAy:3};
+const fin = {tip:'satis', fiyat:12500000, kira:42000, oran:2, alici:true, satici:true, ofis:50, kiraOdeyen:'kiraci', ipotek:0, kredi:false};
+V.finans = () => `
+  <div class="page-head"><div><h1>Finans & Komisyon Sihirbazı</h1><p>Hizmet bedeli → KDV → ofis/danışman payı · müşteriye gösterilecek maliyet hesapları</p></div></div>
+  <div class="grid kokpit-grid">
+    <div class="stack" style="gap:16px">
+      <section class="card"><div class="card-h"><h2>Girdi</h2><div class="chips" id="finTip"><button class="chip ${fin.tip==='satis'?'on':''}" data-v="satis">Satış</button><button class="chip ${fin.tip==='kira'?'on':''}" data-v="kira">Kiralama</button></div></div>
+        <div class="card-b stack">
+          <div class="grid g2" id="satisIn">
+            <div class="field"><label for="fFiyat">Satış bedeli (₺)</label><input class="input num" id="fFiyat" inputmode="numeric" value="${num(fin.fiyat)}"></div>
+            <div class="field"><label for="fOran">Hizmet bedeli oranı (% / taraf)</label><input class="input num" id="fOran" type="number" step="0.1" min="0" value="${fin.oran}"></div>
+            <label class="row small"><input type="checkbox" id="fAlici" ${fin.alici?'checked':''}> Alıcı tarafından</label>
+            <label class="row small"><input type="checkbox" id="fSatici" ${fin.satici?'checked':''}> Satıcı tarafından</label>
+          </div>
+          <div class="grid g2" id="kiraIn">
+            <div class="field"><label for="fKira">Aylık kira bedeli (₺)</label><input class="input num" id="fKira" inputmode="numeric" value="${num(fin.kira)}"></div>
+            <div class="field"><label for="fOdeyen">Hizmet bedelini ödeyen</label><select class="input" id="fOdeyen"><option value="kiraci">Kiracı</option><option value="veren">Kiraya veren</option><option value="yari">Yarı yarıya</option></select></div>
+          </div>
+          <div id="finWarn"></div>
+          <div class="field"><label>Ofis / danışman paylaşımı · Ofis <b id="ofisV">%${fin.ofis}</b> · Danışman <b id="danV">%${100-fin.ofis}</b></label><input type="range" id="fOfis" min="0" max="100" step="5" value="${fin.ofis}" aria-label="Ofis payı"></div>
+        </div></section>
+      <section class="card"><div class="card-h"><h2>Hizmet bedeli</h2><span class="small muted">KDV hariç / dahil</span></div><div class="card-b" id="finOut"></div></section>
+      <div class="grid g2" id="costOut"></div>
+    </div>
+    <aside class="stack" style="gap:16px">
+      <section class="card"><div class="card-h"><h2>Parametreler</h2>${badge('warn','Teyit edilmeli')}</div><div class="card-b stack" style="gap:10px">
+        ${[['satisOran','Satış üst sınırı (% / taraf)'],['kdv','KDV (%)'],['tapuHarci','Tapu harcı (% / taraf)'],['doner','Döner sermaye (₺, yaklaşık)'],['dask','DASK primi (₺, yaklaşık)'],['depozitoAy','Depozito üst sınırı (ay)']].map(([k,l])=>`<div class="row between"><label class="small t2" for="pr-${k}">${l}</label><input class="input num pr" id="pr-${k}" data-k="${k}" type="number" step="any" value="${PARAMS[k]}" style="width:110px;text-align:right"></div>`).join('')}
+        <div class="row between small"><span class="t2">Kira hizmet bedeli</span><b>1 aylık kira + KDV</b></div>
+        <p class="xs muted">Kural seti v2026.09 (örnek). Oranlar koda gömülü değildir; her değişiklik hukuk onayıyla güncellenir. <b>Canlı kullanımdan önce güncel Resmî Gazete ve hukuk danışmanıyla teyit edilmelidir.</b></p></div></section>
+      <section class="card card-b"><h2>Danışman cüzdanı · 2026</h2>
+        <div class="row between small" style="margin-top:10px"><span class="t2">Hak ediş</span><b class="num">${tl(1284000)}</b></div>
+        <div class="row between small" style="margin-top:6px"><span class="t2">Ödenen</span><b class="num">${tl(1096000)}</b></div>
+        <div class="row between small" style="margin-top:6px"><span class="t2">Bekleyen</span><b class="num" style="color:var(--warn)">${tl(188000)}</b></div>
+        <button class="btn block" style="margin-top:12px" data-act="toast" data-msg="e-Fatura entegrasyonu kapalı — Ayarlar > Entegrasyonlar">${ic('file')}Fatura taslağı oluştur</button></section>
+    </aside>
+  </div>`;
+function parseTL(s){ return +String(s).replace(/[^\d]/g,'') || 0; }
+function finCalc(){
+  const k = PARAMS.kdv/100; const out=$('#finOut'); const cost=$('#costOut'); const warn=$('#finWarn');
+  $('#satisIn').classList.toggle('hide', fin.tip!=='satis'); $('#kiraIn').classList.toggle('hide', fin.tip!=='kira');
+  let rows=[], gross=0; warn.innerHTML='';
+  if (fin.tip==='satis'){
+    let oran = fin.oran;
+    if (oran > PARAMS.satisOran){ warn.innerHTML=`<div class="alert err">${ic('shield')}<div class="body"><b>Uyum Motoru — ENGELLE:</b> %${oran.toLocaleString('tr-TR')} yasal üst sınırı (%${PARAMS.satisOran} + KDV / taraf) aşıyor. Hesaplama üst sınırla yapıldı.</div></div>`; oran=PARAMS.satisOran; }
+    const side = fin.fiyat*oran/100;
+    if (fin.alici) rows.push(['Alıcı tarafı', side]); if (fin.satici) rows.push(['Satıcı tarafı', side]);
+    var aliciKom = fin.alici ? side*(1+k) : 0, saticiKom = fin.satici ? side*(1+k) : 0;
+  } else {
+    const b=fin.kira; let a=0,v=0;
+    if (fin.kiraOdeyen==='kiraci') a=b; else if (fin.kiraOdeyen==='veren') v=b; else {a=b/2; v=b/2;}
+    if(a) rows.push(['Kiracıdan', a]); if(v) rows.push(['Kiraya verenden', v]);
+    var kiraciKom=a*(1+k), verenKom=v*(1+k);
+  }
+  gross = rows.reduce((s,r)=>s+r[1],0);
+  const ofis = gross*fin.ofis/100, dan = gross-ofis;
+  out.innerHTML = `<table class="rtable kvm"><thead><tr><th>Kalem</th><th class="r">Hizmet bedeli</th><th class="r">KDV (%${PARAMS.kdv})</th><th class="r">Toplam</th></tr></thead><tbody>
+    ${rows.map(([n,v])=>`<tr><td data-m="full" class="bold">${n}</td><td class="r num" data-l="Bedel">${tl(v)}</td><td class="r num" data-l="KDV">${tl(v*k)}</td><td class="r num bold" data-l="Toplam">${tl(v*(1+k))}</td></tr>`).join('')||`<tr><td class="muted" data-m="full">Taraf seçilmedi</td></tr>`}
+    <tr style="background:var(--surface-2)"><td data-m="full" class="bold">Brüt ofis geliri</td><td class="r num bold" data-l="Bedel">${tl(gross)}</td><td class="r num" data-l="KDV">${tl(gross*k)}</td><td class="r num bold" data-l="Toplam">${tl(gross*(1+k))}</td></tr></tbody></table>
+    <div class="grid g2" style="margin-top:14px;gap:10px"><div class="card kpi" style="box-shadow:none"><div class="l">Ofis payı (%${fin.ofis})</div><div class="v num" id="ofisOut">${tl(ofis)}</div></div><div class="card kpi" style="box-shadow:none"><div class="l">Danışman payı (%${100-fin.ofis})</div><div class="v num" id="danOut" style="color:var(--ok)">${tl(dan)}</div></div></div>
+    <p class="xs muted" style="margin-top:8px">Paylar KDV hariç tutar üzerinden. Franchise ücreti, takım lideri ve referans payları Profesyonel pakette.</p>`;
+  if (fin.tip==='satis'){
+    const harc = fin.fiyat*PARAMS.tapuHarci/100;
+    const buyer = fin.fiyat + harc + PARAMS.doner + PARAMS.dask + aliciKom + (fin.kredi?6500:0);
+    const seller = fin.fiyat - harc - saticiKom - fin.ipotek;
+    cost.innerHTML = `
+    <section class="card"><div class="card-h"><h2>Alıcının toplam maliyeti</h2></div><div class="card-b">
+      ${[['Satış bedeli',fin.fiyat],[`Tapu harcı (%${PARAMS.tapuHarci})`,harc],['Döner sermaye (yaklaşık)',PARAMS.doner],['DASK (yaklaşık)',PARAMS.dask],['Hizmet bedeli + KDV',aliciKom]].concat(fin.kredi?[['Ekspertiz (kredi)',6500]]:[]).map(([n,v])=>`<div class="row between small" style="padding:5px 0"><span class="t2">${n}</span><span class="num">${tl(v)}</span></div>`).join('')}
+      <label class="row small" style="margin:6px 0"><input type="checkbox" id="fKredi" ${fin.kredi?'checked':''}> Kredili alım (ekspertiz ekle)</label>
+      <div class="row between" style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px"><b>Toplam</b><b class="num" style="font-size:18px">${tl(buyer)}</b></div>
+      <p class="xs muted" style="margin-top:6px">Beyan edilen değer rayiç değerin altında olamaz.</p></div></section>
+    <section class="card"><div class="card-h"><h2>Satıcının eline geçen</h2></div><div class="card-b">
+      ${[['Satış bedeli',fin.fiyat],[`Tapu harcı (%${PARAMS.tapuHarci})`,-harc],['Hizmet bedeli + KDV',-saticiKom]].map(([n,v])=>`<div class="row between small" style="padding:5px 0"><span class="t2">${n}</span><span class="num">${v<0?'−':''}${tl(Math.abs(v))}</span></div>`).join('')}
+      <div class="row between small" style="padding:5px 0"><label class="t2" for="fIpotek">İpotek kapama</label><input class="input num" id="fIpotek" inputmode="numeric" value="${num(fin.ipotek)}" style="width:130px;height:32px;text-align:right"></div>
+      <div class="row between" style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px"><b>Net</b><b class="num" style="font-size:18px;color:var(--ok)">${tl(seller)}</b></div>
+      <p class="xs muted" style="margin-top:6px">5 yıldan kısa elde tutmada değer artış kazancı vergisi doğabilir.</p></div></section>`;
+  } else {
+    const dep = fin.kira*PARAMS.depozitoAy;
+    cost.innerHTML = `
+    <section class="card"><div class="card-h"><h2>Kiracının ilk ödemesi</h2></div><div class="card-b">
+      ${[['İlk ay kirası',fin.kira],[`Depozito (en fazla ${PARAMS.depozitoAy} ay)`,dep],['Hizmet bedeli + KDV',kiraciKom]].map(([n,v])=>`<div class="row between small" style="padding:5px 0"><span class="t2">${n}</span><span class="num">${tl(v)}</span></div>`).join('')}
+      <div class="row between" style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px"><b>Toplam</b><b class="num" style="font-size:18px">${tl(fin.kira+dep+kiraciKom)}</b></div></div></section>
+    <section class="card"><div class="card-h"><h2>Kiraya verenin ilk ay neti</h2></div><div class="card-b">
+      ${[['İlk ay kirası',fin.kira],['Hizmet bedeli + KDV',-verenKom]].map(([n,v])=>`<div class="row between small" style="padding:5px 0"><span class="t2">${n}</span><span class="num">${v<0?'−':''}${tl(Math.abs(v))}</span></div>`).join('')}
+      <div class="row between" style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px"><b>Net</b><b class="num" style="font-size:18px;color:var(--ok)">${tl(fin.kira-verenKom)}</b></div>
+      <p class="xs muted" style="margin-top:6px">Konut kira artışı: önceki 12 aylık TÜFE ortalamasını aşamaz.</p></div></section>`;
+  }
+  const kr=$('#fKredi'); if(kr) kr.addEventListener('change',e=>{fin.kredi=e.target.checked;finCalc();});
+  const ip=$('#fIpotek'); if(ip) ip.addEventListener('change',e=>{fin.ipotek=parseTL(e.target.value);finCalc();});
+}
+MOUNT.finans = () => {
+  $('#fOdeyen').value = fin.kiraOdeyen;
+  finCalc();
+  const money = (id,key)=>{ const el=$(id); el.addEventListener('input',()=>{ fin[key]=parseTL(el.value); const pos=el.value.length-el.selectionStart; el.value=num(fin[key]); el.setSelectionRange(el.value.length-pos,el.value.length-pos); finCalc(); }); };
+  money('#fFiyat','fiyat'); money('#fKira','kira');
+  $('#fOran').addEventListener('input',e=>{fin.oran=+e.target.value||0;finCalc();});
+  $('#fAlici').addEventListener('change',e=>{fin.alici=e.target.checked;finCalc();});
+  $('#fSatici').addEventListener('change',e=>{fin.satici=e.target.checked;finCalc();});
+  $('#fOdeyen').addEventListener('change',e=>{fin.kiraOdeyen=e.target.value;finCalc();});
+  $('#fOfis').addEventListener('input',e=>{fin.ofis=+e.target.value;$('#ofisV').textContent='%'+fin.ofis;$('#danV').textContent='%'+(100-fin.ofis);finCalc();});
+  $('#finTip').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;fin.tip=b.dataset.v;$$('#finTip .chip').forEach(x=>x.classList.toggle('on',x===b));finCalc();});
+  $$('.pr').forEach(el=>el.addEventListener('input',()=>{PARAMS[el.dataset.k]=+el.value||0;finCalc();}));
+};
+
+/* ---- 10. Raporlar ---- */
+function barChart(data, {W=640, h=240, fmt=v=>v, unit=''}={}){
+  const pad={l:44,r:8,t:12,b:26}, iw=W-pad.l-pad.r, ih=h-pad.t-pad.b;
+  const max=Math.max(...data.map(d=>d[1]))*1.1, step=niceStep(max), top=Math.ceil(max/step)*step;
+  const bw=iw/data.length, gap=Math.max(2,bw*.28);
+  let g=''; for(let v=0; v<=top; v+=step){ const y=pad.t+ih-(v/top)*ih; g+=`<line class="gl" x1="${pad.l}" x2="${W-pad.r}" y1="${y}" y2="${y}"/><text class="ax" x="${pad.l-6}" y="${y+4}" text-anchor="end">${fmt(v)}</text>`; }
+  const bars=data.map(([l,v],i)=>{ const x=pad.l+i*bw+gap/2, w=bw-gap, bh=(v/top)*ih, y=pad.t+ih-bh; const last=i===data.length-1;
+    return `<path class="bar ${last?'':''}" d="${roundTop(x,y,w,bh,4)}" data-tip="${l}: ${unit==='₺'?tl(v*1000):v}"/>${bw>=34||i%2===1?`<text class="ax" x="${x+w/2}" y="${h-8}" text-anchor="middle">${l}</text>`:''}`; }).join('');
+  return `<svg viewBox="0 0 ${W} ${h}" role="img">${g}${bars}</svg>`;
+}
+function hbarChart(data,{W=460, fmt=v=>v, labelW=110, rowH=32, showPct=false}={}){
+  const max=Math.max(...data.map(d=>d[1])), iw=W-labelW-70, h=data.length*rowH+4;
+  return `<svg viewBox="0 0 ${W} ${h}" role="img">${data.map(([l,v],i)=>{ const y=i*rowH+4, w=Math.max(3,v/max*iw);
+    const p = showPct && i>0 ? ` · %${Math.round(v/data[i-1][1]*100)}` : '';
+    return `<text class="lb" x="${labelW-10}" y="${y+rowH/2+2}" text-anchor="end">${l}</text><path class="bar" d="${roundRight(labelW,y+5,w,rowH-12,4)}" data-tip="${l}: ${fmt(v)}${p?` (önceki adımın ${p.replace(' · ','')}'i)`:''}"/><text class="lb num" x="${labelW+w+6}" y="${y+rowH/2+2}">${fmt(v)}${p}</text>`; }).join('')}</svg>`;
+}
+function niceStep(max){ const raw=max/4, p=Math.pow(10,Math.floor(Math.log10(raw))), n=raw/p; return (n<=1?1:n<=2?2:n<=5?5:10)*p; }
+function roundTop(x,y,w,h,r){ r=Math.min(r,w/2,h); return `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`; }
+function roundRight(x,y,w,h,r){ r=Math.min(r,h/2,w); return `M${x},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h-r}Q${x+w},${y+h} ${x+w-r},${y+h}H${x}Z`; }
+const REV = [['Eki',410],['Kas',520],['Ara',380],['Oca',290],['Şub',450],['Mar',610],['Nis',700],['May',820],['Haz',560],['Tem',640],['Ağu',590],['Eyl',780]];
+V.raporlar = () => `
+  <div class="page-head"><div><h1>Raporlar</h1><p>Son 12 ay · danışman görünümü</p></div><div class="chips"><button class="chip on">12 ay</button><button class="chip" data-act="toast" data-msg="Prototipte yalnızca 12 ay görünümü var">Çeyrek</button><button class="chip" data-act="toast" data-msg="Ofis görünümü Broker rolünde açılır">Ofis</button></div></div>
+  <div class="grid g4" style="margin-bottom:16px">
+    <div class="card kpi"><div class="l">12 aylık komisyon (KDV hariç)</div><div class="v num">${tl(REV.reduce((s,r)=>s+r[1],0)*1000)}</div><div class="d up">${ic('up')} %18 geçen yıla göre</div></div>
+    <div class="card kpi"><div class="l">Ort. satış süresi</div><div class="v num">47 gün</div><div class="d up">${ic('up')} 6 gün daha hızlı</div></div>
+    <div class="card kpi"><div class="l">Liste / satış fiyatı</div><div class="v num">%96,4</div><div class="d muted">Bölge ort. %93,1</div></div>
+    <div class="card kpi"><div class="l">90 gün beklenen ciro</div><div class="v num">${tl(expectedComm())}</div><div class="d muted">Pipeline olasılıklarına göre</div></div>
+  </div>
+  <div class="grid g2">
+    <section class="card" style="grid-column:1/-1"><div class="card-h"><h2>Aylık komisyon geliri (bin ₺)</h2><span class="small muted">Eylül: ${tl(780000)} · en yüksek: Mayıs</span></div><div class="card-b chart" id="chRev"></div></section>
+    <section class="card"><div class="card-h"><h2>Lead kaynağı (adet, 12 ay)</h2></div><div class="card-b chart" id="chLead"></div></section>
+    <section class="card"><div class="card-h"><h2>Dönüşüm hunisi</h2></div><div class="card-b chart" id="chFun"></div></section>
+  </div>
+  <p class="xs muted" style="margin-top:10px">Grafiklerin üzerine gelerek değerleri görebilirsiniz. Tüm veriler örnektir.</p>`;
+
+const LEADS=[['FSBO Radar',34],['Referans',22],['sahibinden.com',18],['Sfer (bölge)',11],['Instagram',8],['Web sitesi',7]];
+const FUNNEL=[['Lead',240],['Görüşme',132],['Gösterim',78],['Teklif',21],['Kapanış',9]];
+function drawCharts(){
+  const w = id => { const el=$(id); return el ? Math.max(260, el.clientWidth - 32) : 0; };
+  if(!$('#chRev')) return;
+  $('#chRev').innerHTML = barChart(REV,{W:w('#chRev'),h:innerWidth<=768?220:260,fmt:v=>num(v),unit:'₺'});
+  $('#chLead').innerHTML = hbarChart(LEADS,{W:w('#chLead')});
+  $('#chFun').innerHTML = hbarChart(FUNNEL,{W:w('#chFun'),showPct:true,labelW:80});
+}
+MOUNT.raporlar = drawCharts;
+let _rz; window.addEventListener('resize', ()=>{ clearTimeout(_rz); _rz=setTimeout(()=>{ if(route().name==='raporlar') drawCharts(); },120); });
+
+/* ---- 11. Ayarlar ---- */
+V.ayarlar = () => `
+  <div class="page-head"><div><h1>Ayarlar & Paket</h1><p>DC Emlak Kadıköy Ofisi · 6 danışman · Profesyonel paket</p></div></div>
+  <h2 style="margin-bottom:10px">Paketler <span class="small muted" style="font-weight:500">danışman başına / ay, KDV hariç</span></h2>
+  <div class="grid g3" style="margin-bottom:24px">
+    ${[['Temel',490,'Tek danışman ve küçük ofis için başlangıç',['Kokpit & görevler','Portföy + müşteri (CRM)','Takvim & Yer Gösterme Belgesi','Komisyon sihirbazı','Uyum Motoru (temel kurallar)'],false],
+       ['Profesyonel',890,'1–20 danışmanlı ofisler için önerilen',['Temel paketteki her şey','FSBO Radar + arama senaryoları','Eşleştirme motoru + katalog','İşlem hattı (Kanban) + kapanış listeleri','Mal sahibi raporları','Ofis raporları, split motoru'],true],
+       ['Premium',1390,'Ağ/MLS ve ileri analitik',['Profesyoneldeki her şey','Ofis ağı / MLS paylaşımı','CMA değerleme raporları','Müşteri portalı','Öncelikli destek + eğitim akademisi'],false]
+    ].map(([n,pr,d,f,pop])=>`<div class="card plan ${pop?'pop':''}"><div class="row between"><h2>${n}</h2>${pop?badge('brand','Mevcut paket'):''}</div><div class="pr num">${tl(pr)}<span class="small muted" style="font-weight:500"> /danışman/ay</span></div><p class="small muted">${d}</p><ul>${f.map(x=>`<li>${ic('check')}${x}</li>`).join('')}</ul><button class="btn ${pop?'':'primary'} block" style="margin-top:auto" data-act="toast" data-msg="${pop?'Zaten bu paketi kullanıyorsunuz':n+' paketine geçiş talebi alındı (örnek)'}">${pop?'Mevcut':'Geçiş yap'}</button></div>`).join('')}
+  </div>
+  <p class="small muted" style="margin:-12px 0 24px">Ücretli dış servisler (SMS, WhatsApp, Yapay Zekâ, e-İmza, e-Fatura) pakete dâhil değildir; kendi hesabınız/anahtarınızla bağlanır, maliyeti doğrudan sağlayıcıya ödenir.</p>
+  <div class="grid kokpit-grid">
+    <section class="card"><div class="card-h"><h2>Entegrasyonlar</h2>${badge('','Kendi anahtarınızla')}</div><div class="list" id="integ">${INTEGRATIONS.map(integRow).join('')}</div></section>
+    <aside class="stack" style="gap:16px">
+      <section class="card card-b"><h2>Ofis & yetki belgesi</h2><dl class="kv" style="grid-template-columns:1fr;margin-top:6px"><div style="padding-left:0"><dt>Yetki belgesi no</dt><dd class="num">3401-2231</dd></div><div style="padding-left:0"><dt>Geçerlilik</dt><dd>${badge('ok','12.03.2029')}</dd></div><div style="padding-left:0"><dt>VERBİS</dt><dd>${badge('ok','Kayıtlı')}</dd></div><div style="padding-left:0"><dt>MASAK eğitim kaydı</dt><dd>${badge('warn','Yenilenmeli')}</dd></div></dl></section>
+      <section class="card card-b"><h2>Görünüm</h2><div class="row between" style="margin-top:10px"><span class="small t2">Koyu tema</span><button class="switch" role="switch" id="darkSw" aria-checked="${isDark()}" data-act="theme" aria-label="Koyu tema"></button></div></section>
+    </aside></div>`;
+function integRow(x){ return `<div class="li"><span class="ic ${x.on?'ok':''}">${ic({sms:'msg',wa:'wa',ai:'sparkle',esign:'pen',efatura:'file'}[x.k])}</span><div class="grow"><div class="t">${x.t}</div><div class="s">${x.d}</div><div class="xs" style="margin-top:3px;color:${x.on?'var(--ok)':'var(--muted)'}">${x.on?'Açık – anahtar doğrulandı':'Kapalı – kendi anahtarınızla etkinleştirin'}</div></div><button class="switch" role="switch" aria-checked="${x.on}" data-act="integ" data-k="${x.k}" aria-label="${x.t}"></button></div>`; }
+
+/* ---- Mesajlar ---- */
+let openConv = null;
+V.mesajlar = (id) => { openConv = id||null; const cv = CONVS.find(c=>c.id===id);
+  const chB = ch => badge({WhatsApp:'ok',Portal:'info','Web formu':'brand','E-posta':'',Instagram:'warn'}[ch]||'',ch);
+  return `<div class="page-head"><div><h1>Mesajlar</h1><p>Birleşik gelen kutusu · WhatsApp, portal, e-posta, web formu, Instagram</p></div></div>
+  <div class="card inbox ${cv?'open':''}"><div class="conv-list list">${CONVS.map(c=>`<a class="li link" href="#/mesajlar/${c.id}" style="color:inherit;${cv&&cv.id===c.id?'background:var(--brand-soft)':''}"><span class="avatar">${c.name[0]==='@'?'IG':initials(c.name)||'?'}</span><div class="grow"><div class="row between"><span class="t ellipsis">${c.name}</span><span class="xs muted">${c.t}</span></div><div class="row between"><span class="s ellipsis">${c.msgs[c.msgs.length-1][1]}</span>${c.unread?`<span class="badge brand">${c.unread}</span>`:''}</div><div style="margin-top:4px">${chB(c.ch)}</div></div></a>`).join('')}</div>
+  <div class="conv-view" style="display:flex;flex-direction:column">${cv?`<div class="card-h"><div class="row"><a class="icon-btn only-m" href="#/mesajlar" aria-label="Geri">${ic('left')}</a><div><b>${cv.name}</b><div class="xs muted">${cv.ch}${cv.pid?` · <a href="#/portfoy/${cv.pid}">${P(cv.pid).title}</a>`:''}</div></div></div>${badge('ok','KVKK ✔ · İYS ✔')}</div>
+    <div class="msgs grow">${cv.msgs.map(([w,t])=>`<div class="bubble ${w==='me'?'me':''}">${esc(t)}</div>`).join('')}</div>
+    <div class="row" style="padding:12px;border-top:1px solid var(--border)"><input class="input" id="msgIn" placeholder="Mesaj yazın…"><button class="btn primary" data-act="sendmsg" data-id="${cv.id}" aria-label="Gönder">${ic('send')}</button></div>
+    <div class="row wrap" style="padding:0 12px 12px;gap:6px">${['Evet, hâlâ satılık','Gösterim için uygun saatiniz?','Katalog linkini gönderiyorum'].map(q=>`<button class="chip" data-act="quickreply" data-t="${q}">${q}</button>`).join('')}</div>`
+    :`<div class="card-b muted" style="margin:auto;text-align:center">${ic('msg')}<p>Bir konuşma seçin</p></div>`}</div></div>`; };
+
+function notFound(){ return `<div class="card card-b" style="text-align:center;padding:48px"><h2>Sayfa bulunamadı</h2><p class="muted" style="margin:8px 0 16px">Aradığınız kayıt prototipte yok.</p><a class="btn primary" href="#/kokpit">Kokpit'e dön</a></div>`; }
+
+/* ================= Router ================= */
+function route(){ const parts = (location.hash.replace(/^#\/?/,'')||'kokpit').split('/'); return {name:parts[0], args:parts.slice(1)}; }
+function render(){
+  const {name,args} = route();
+  const view = V[name];
+  $('#view').innerHTML = view ? view(...args.map(decodeURIComponent)) : notFound();
+  if (MOUNT[name]) MOUNT[name](...args);
+  const navKey = PARENT[name] || name;
+  $$('#sideNav a').forEach(a=>a.classList.toggle('active', a.dataset.nav===navKey));
+  $$('.tabbar [data-tab]').forEach(a=>a.classList.toggle('active', a.dataset.tab===navKey || (a.dataset.tab==='menu' && !['kokpit','radar','mesajlar'].includes(navKey))));
+  $('#pageTitle').textContent = TITLES[name] || '';
+  document.title = (TITLES[name]? TITLES[name]+' · ' : '') + 'DC Emlak Prototip';
+}
+let prevRoute = '';
+window.addEventListener('hashchange', ()=>{ const r=route(); const same = r.name===prevRoute; prevRoute=r.name; closeAll(); render(); if(!same) window.scrollTo(0,0); });
+
+/* ================= Global actions ================= */
+const ACT = {
+  close: closeAll,
+  theme: ()=>{ setTheme(isDark()?'light':'dark'); },
+  cmdk: openCmdk,
+  quick: ()=> openSheet('Hızlı ekle', `<div class="quick">${[['portfoy','Portföy','building','brand'],['musteri','Müşteri','userplus','info'],['gosterim','Gösterim','cal','ok'],['voice','Sesle not','mic','err'],['photo','Fotoğraf','camera','warn']].map(([k,t,i,c])=>`<button data-act="${k==='voice'?'voice':k==='photo'?'photo':'form'}" data-f="${k}"><span class="ic ${c}">${ic(i)}</span>${t}</button>`).join('')}</div><p class="xs muted" style="text-align:center">Her yerden tek dokunuşla kayıt · çevrimdışıyken yerelde saklanır</p>`),
+  menu: ()=> openSheet('Menü', `<div class="row" style="gap:10px"><span class="avatar lg">EK</span><div><b>Emrullah K.</b><div class="xs muted">Danışman · DC Emlak Kadıköy</div></div></div><div class="navgrid">${NAV.flatMap(g=>g[1]).map(([k,t,i])=>`<a href="#/${k}" class="${(PARENT[route().name]||route().name)===k?'active':''}">${ic(i)}${t}</a>`).join('')}</div><button class="btn block" data-act="theme">${ic('moon')}Tema değiştir</button>`),
+  notifs: ()=> openSheet('Bildirimler', `<div class="list" style="margin:-16px">${NOTIFS.map(([i,k,t,s,h])=>`<a class="li link" href="${h}" style="color:inherit"><span class="ic ${k}">${ic(i)}</span><div class="grow"><div class="t">${t}</div><div class="s">${s}</div></div></a>`).join('')}</div>`),
+  toast: el => toast(el.dataset.msg||'Tamam'),
+  call: el => openCall(el.dataset.id),
+  dial: (el,e) => { e.preventDefault(); toast('Arama başlatıldı (prototip) · kayıt KVKK rızasıyla', 'phone'); },
+  callres: el => { closeAll(); toast(el.dataset.r); },
+  resend: () => toast('OTP imza bağlantısı tekrar gönderildi', 'send'),
+  renew: () => openModal('Yetki sözleşmesini yenile', `<p class="t2">Caddebostan 2+1 · Canan Öztürk · mevcut bitiş: 30 Eylül 2026</p><div class="field"><label>Yeni süre</label><select class="input"><option>3 ay</option><option selected>6 ay</option><option>12 ay</option></select></div><div class="field"><label>Tür</label><select class="input"><option>Genel</option><option>Münhasır</option></select></div><p class="xs muted">Sözleşme akıllı alanlarla doldurulup OTP ile imzaya gönderilir.</p>`, `<button class="btn" data-act="close">Vazgeç</button><button class="btn primary" data-act="renewok">İmzaya gönder</button>`),
+  renewok: () => { closeAll(); toast('Yenileme sözleşmesi mal sahibine gönderildi','send'); },
+  eids: el => { const p=P(el.dataset.id); openModal('EİDS yetkilendirme talebi', `<div class="steps">${[['Portföy kartından talep oluşturulur',true],['Malik e-Devlet > EİDS ekranından işletmeye yetki verir',false],['Doğrulama kodu portföye bağlanır',false],['İlan portallara bu kimlikle gönderilir',false]].map(([t,d],i)=>`<div class="step ${d?'done':i===1?'cur':''}"><span class="n">${i+1}</span><div class="small">${t}</div></div>`).join('')}</div><div class="field"><label>Malike gidecek WhatsApp mesajı</label><textarea class="input" rows="4">Merhaba ${p.owner.split(' ')[0]} Hanım/Bey, ilanınızın yayına çıkabilmesi için e-Devlet'te "Elektronik İlan Doğrulama" ekranından DC Emlak'a (Yetki No 3401-2231) yetki vermeniz gerekiyor. Adım adım rehber: dcemlak.app/eids</textarea></div>`, `<button class="btn" data-act="close">Vazgeç</button><button class="btn primary" data-act="eidsok" data-id="${p.id}">${ic('wa')}Gönder</button>`); },
+  eidsok: el => { const p=P(el.dataset.id); if(p.eids==='none') p.eids='pending'; closeAll(); render(); toast('EİDS yönlendirmesi malike gönderildi · Kokpit takibe aldı','send'); },
+  ownerReport: el => { const p=P(el.dataset.id); const v=p.ch.reduce((s,c)=>s+c[1],0), a=p.ch.reduce((s,c)=>s+c[2],0);
+    openModal('Mal sahibine haftalık rapor', `<div class="doc"><b>${p.title}</b> — 17–23 Eylül raporu<br>Sayın ${p.owner},<br>Bu hafta ilanınız <span class="f">${num(v)} görüntülenme</span>, <span class="f">${a} arama</span> ve <span class="f">${p.showings} gösterim</span> aldı. Ortalama gösterim puanı <span class="f">${p.fb?p.fb.toLocaleString('tr-TR'):'—'}/5</span>. Bölgede 14 ilanda fiyat düşüşü oldu; medyan m² fiyatı ${tl(98400)}.<br>Öne çıkan geri bildirim: "Konum çok iyi, salon biraz karanlık."</div><div class="row wrap"><label class="row small"><input type="checkbox" checked> WhatsApp</label><label class="row small"><input type="checkbox" checked> E-posta</label><label class="row small"><input type="checkbox"> Her pazartesi otomatik gönder</label></div>`, `<button class="btn" data-act="close">Vazgeç</button><button class="btn primary" data-act="reportok">${ic('send')}Gönder</button>`, true); },
+  reportok: () => { closeAll(); toast('Rapor mal sahibine gönderildi','send'); },
+  catalog: el => { const c=C(el.dataset.id); if(!sel.size){ toast('En az bir portföy seçin','alert'); return; }
+    const items=[...sel].map(P);
+    openModal('WhatsApp ile katalog', `<div class="row small"><span class="muted">Alıcı:</span><b>${c.name}</b><span class="muted">${c.tel}</span></div>
+      <div class="doc" style="font-family:inherit">Merhaba ${c.name.split(' ')[0]} Hanım/Bey, arayışınıza uygun ${items.length} portföyü sizin için seçtim:<br>${items.map(p=>`• ${p.title} — <b>${p.islem==='Kiralık'?tl(p.price)+'/ay':mTL(p.price)}</b>`).join('<br>')}<br>Beğendiklerinizi işaretleyin: <span class="f">dcemlak.app/k/7Hq2</span><br>— Emrullah K., DC Emlak</div>
+      ${c.kvkk?badge('ok','KVKK ✔ · İYS izni ✔','check'):`<div class="alert warn">${ic('lock')}<div class="body">KVKK açık rızası yok — ticari ileti gönderilemez.</div></div>`}
+      <p class="xs muted">WhatsApp Business API kapalı: prototipte mesaj "wa.me" bağlantısıyla elle gönderilir.</p>`,
+      `<button class="btn" data-act="close">Vazgeç</button><button class="btn primary" data-act="catok" ${c.kvkk?'':'disabled'}>${ic('wa')}Gönder</button>`); },
+  catok: () => { closeAll(); toast('Katalog gönderildi · beğeniler anlık bildirilecek','wa'); },
+  move: el => tryMove(el.dataset.id, el.dataset.stage),
+  retry: el => { closeModal(); tryMove(el.dataset.id, el.dataset.stage); },
+  forcemove: el => { toast('UYAR onaylandı · gerekçe denetim kaydına yazıldı','alert'); doMove(P(el.dataset.id), el.dataset.stage); },
+  fix: el => { toast(el.dataset.k==='yetki'?'Yetki sözleşmesi OTP ile imzaya gönderildi':'EİDS yönlendirmesi malike WhatsApp ile gönderildi','send'); const p=P(el.dataset.id); if(el.dataset.k==='eids'&&p.eids==='none') p.eids='pending'; },
+  fixsim: el => { const p=P(el.dataset.id); if(el.dataset.k==='yetki') p.yetki={ok:true,kalan:90,tur:p.yetki.tur}; else p.eids='ok'; el.closest('.card').innerHTML=`<div class="row" style="color:var(--ok)">${ic('check')}<b>Tamamlandı (prototip)</b></div>`; if(route().name==='islemler') render(); },
+  ygb: el => ygbFlow(el.dataset.id,1),
+  ygb2: el => ygbFlow(el.dataset.id,2),
+  otpfill: (el,e) => { e.preventDefault(); $$('#otp input').forEach((i,n)=>i.value='482913'[n]); },
+  ygb3: el => { const code=$$('#otp input').map(i=>i.value).join('');
+    if(code!=='482913'){ $('#otpErr').innerHTML=`<div class="alert err">${ic('x')}<div class="body">Kod hatalı. Prototip kodu: 482913</div></div>`; return; }
+    const s=SHOWINGS.find(x=>x.id===el.dataset.id); s.ygb='imzali'; s.ygbZaman='10:34'; closeAll(); render(); toast('Yer Gösterme Belgesi imzalandı · konum + zaman damgası eklendi','pen'); },
+  complete: el => { const s=SHOWINGS.find(x=>x.id===el.dataset.id);
+    if(s.ygb!=='imzali'){ openModal(`${ic('shield')} Uyum Motoru`, `<div class="alert err">${ic('x')}<div class="body"><b>ENGELLE:</b> Yer Gösterme Belgesi imzalanmadan gösterim "tamamlandı" yapılamaz (Taşınmaz Ticareti Yönetmeliği).</div></div>`, `<button class="btn" data-act="close">Kapat</button><button class="btn primary" data-act="ygb" data-id="${s.id}">${ic('pen')}Belgeyi imzaya gönder</button>`); return; }
+    s.durum='tamamlandi'; render(); toast('Gösterim tamamlandı · geri bildirim anketi planlandı'); },
+  tpl: el => { const t=TEMPLATES.find(x=>x.k===el.dataset.k);
+    openModal(t.t, `${badge('warn','Taslak – hukuk onayı bekliyor')}<div class="doc"><b>${t.t.toLocaleUpperCase('tr')}</b><br><br>Taraflar: <span class="f">{Mal sahibi adı}</span> ile <span class="f">DC Emlak — Yetki Belgesi No 3401-2231</span> arasında, <span class="f">{İl/İlçe/Mahalle}</span>, Ada <span class="f">{ada}</span> Parsel <span class="f">{parsel}</span> taşınmaz için düzenlenmiştir.<br><br>Hizmet bedeli: <span class="f">{oran}</span> + KDV <span class="xs muted">(üst sınır kontrolü: %2 / taraf)</span><br>Süre: <span class="f">{başlangıç}</span> – <span class="f">{bitiş}</span><br>Kişisel veriler: <span class="f miss">{KVKK aydınlatma onayı — eksik}</span><br><br><span class="muted">… (örnek metin)</span></div><p class="xs muted">Zorunlu alanlar (kırmızı) dolmadan imzaya gönderilemez. ${t.v} · ${t.alan} akıllı alan.</p>`, `<button class="btn" data-act="close">Kapat</button><button class="btn" data-act="toast" data-msg="PDF indirildi (örnek)">${ic('download')}PDF</button>`, true); },
+  integ: el => { const x=INTEGRATIONS.find(i=>i.k===el.dataset.k);
+    if(x.on){ x.on=false; $('#integ').innerHTML=INTEGRATIONS.map(integRow).join(''); toast(`${x.t} kapatıldı`); return; }
+    openModal(`${x.t} — etkinleştir`, `<p class="t2">Bu modül ücretli bir dış servistir ve pakete dâhil değildir. Kendi sağlayıcı hesabınızın API anahtarını girin; anahtar şifreli kasada saklanır.</p><div class="field"><label for="apiKey">API anahtarı</label><input class="input" id="apiKey" placeholder="sk_live_…" autocomplete="off"></div><div id="keyErr"></div>`, `<button class="btn" data-act="close">Vazgeç</button><button class="btn primary" data-act="integok" data-k="${x.k}">Doğrula ve aç</button>`); setTimeout(()=>$('#apiKey').focus(),60); },
+  integok: el => { const v=$('#apiKey').value.trim(); if(v.length<8){ $('#keyErr').innerHTML=`<div class="alert err">${ic('x')}<div class="body">Geçerli bir anahtar girin (en az 8 karakter).</div></div>`; return; }
+    const x=INTEGRATIONS.find(i=>i.k===el.dataset.k); x.on=true; closeAll(); $('#integ').innerHTML=INTEGRATIONS.map(integRow).join(''); toast(`${x.t} etkinleştirildi (örnek)`); },
+  sendmsg: el => { const inp=$('#msgIn'); if(!inp.value.trim()) return; CONVS.find(c=>c.id===el.dataset.id).msgs.push(['me',inp.value.trim()]); render(); },
+  quickreply: el => { const i=$('#msgIn'); i.value=el.dataset.t; i.focus(); },
+  pfview: el => { pf.view=el.dataset.v; render(); },
+  form: el => openForm(el.dataset.f),
+  formok: el => { closeAll(); toast(`${el.dataset.n} kaydedildi (prototip)`); },
+  voice: () => { openModal('Sesle not', `<div class="rec">${ic('mic')}</div><p style="text-align:center" class="t2" id="recT">Dinleniyor… <b class="num" id="recS">0:00</b></p><div id="recOut"></div>`, `<button class="btn" data-act="close">Vazgeç</button><button class="btn primary" data-act="voicestop" id="vStop">Bitir ve özetle</button>`);
+    let s=0; clearInterval(window._rec); window._rec=setInterval(()=>{ s++; const el=$('#recS'); if(el) el.textContent=`0:${String(s).padStart(2,'0')}`; if(s>=30) clearInterval(window._rec); },1000); },
+  voicestop: () => { clearInterval(window._rec); $('.rec').style.animation='none'; $('.rec').style.background='var(--ok)'; $('#recT').innerHTML='<b>AI özeti</b> <span class="badge info">Yapay Zekâ modülü kapalı — örnek çıktı</span>';
+    $('#recOut').innerHTML = `<div class="script">"Zeynep Hanım Moda dairesini beğendi, eşi de görmek istiyor. Fiyatta %3 pazarlık bekliyor."</div><div class="li" style="padding:10px 0;border:0"><span class="ic brand">${ic('clock')}</span><div class="grow"><div class="t">Görev: Salı 14:00 tekrar ara</div><div class="s">Zeynep Aydın · eşiyle ikinci gösterim</div></div></div>`;
+    $('#vStop').outerHTML = `<button class="btn primary" data-act="formok" data-n="Not ve görev">Kaydet</button>`; },
+  photo: () => { closeAll(); toast('Kamera açıldı (prototip) · fotoğraflar portföye eklenecek','camera'); }
+};
+function openForm(k){
+  const F = {
+    portfoy:['Yeni portföy',[['Başlık','Moda 2+1, bahçe katı'],['Satış / kira bedeli (₺)','8.500.000'],['İlçe / mahalle','Kadıköy / Moda'],['Mal sahibi','Ad Soyad'],['Mal sahibi telefonu','05xx xxx xx xx']],'Portföy "Aday" aşamasında oluşturulur. Yayın için yetki sözleşmesi ve EİDS gerekir.'],
+    musteri:['Yeni müşteri',[['Ad soyad','Ad Soyad'],['Telefon','05xx xxx xx xx'],['Tip','Alıcı'],['Bütçe','8–10 M ₺'],['Sonraki adım (zorunlu)','Yarın 11:00 ara']],'KVKK aydınlatma metni SMS ile otomatik gönderilir.'],
+    gosterim:['Yeni gösterim',[['Portföy','Moda Mah. 3+1'],['Müşteri','Zeynep Aydın'],['Tarih / saat','25.09.2026 11:00']],'Yer Gösterme Belgesi taslağı otomatik hazırlanır.']
+  }[k]; if(!F) return;
+  openSheet(F[0], F[1].map(([l,ph_],i)=>`<div class="field"><label for="ff${i}">${l}</label><input class="input" id="ff${i}" placeholder="${ph_}"></div>`).join('')+`<p class="xs muted">${F[2]}</p>`, `<button class="btn" data-act="close">Vazgeç</button><button class="btn primary" data-act="formok" data-n="${F[0].replace('Yeni ','').replace(/^./,c=>c.toLocaleUpperCase('tr'))}">Kaydet</button>`);
+}
+document.addEventListener('click', e=>{
+  const a = e.target.closest('[data-act]');
+  if (a && ACT[a.dataset.act]) { if(a.tagName==='BUTTON'||a.dataset.act==='dial'||a.dataset.act==='otpfill') e.preventDefault(); ACT[a.dataset.act](a,e); return; }
+  const h = e.target.closest('[data-href]');
+  if (h && !e.target.closest('a,button,input,label')) { location.hash = h.dataset.href; return; }
+  if (e.target.classList.contains('overlay')) closeAll();
+});
+document.addEventListener('keydown', e=>{
+  if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); openCmdk(); }
+  else if (e.key==='Escape') { clearInterval(window._rec); closeAll(); }
+  else if (e.key==='Enter' && e.target.matches('[data-href]')) location.hash = e.target.dataset.href;
+  else if (e.key==='Enter' && e.target.id==='msgIn') $('[data-act=sendmsg]').click();
+});
+
+/* ================= Tooltip ================= */
+document.addEventListener('mouseover', e=>{ const t=e.target.closest('[data-tip]'); const tip=$('#tip'); if(!t){ tip.classList.remove('on'); return; } tip.textContent=t.dataset.tip; tip.classList.add('on'); });
+document.addEventListener('mousemove', e=>{ const tip=$('#tip'); if(!tip.classList.contains('on')) return; const x=Math.min(e.clientX+12, innerWidth-tip.offsetWidth-8); tip.style.left=x+'px'; tip.style.top=(e.clientY+14)+'px'; });
+
+/* ================= Command palette ================= */
+let cmdSel = 0, cmdItems = [];
+function openCmdk(){ closeAll(); lastFocus=document.activeElement; $('#cmdkOv').classList.add('on'); const i=$('#cmdkIn'); i.value=''; cmdSearch(''); setTimeout(()=>i.focus(),30); }
+function cmdSearch(q){
+  const n=norm(q.trim()), digits=q.replace(/\D/g,'');
+  const hit = s => !n || norm(s).includes(n) || (digits.length>=3 && s.replace(/\D/g,'').includes(digits));
+  const groups = [
+    ['Ekranlar', NAV.flatMap(g=>g[1]).filter(([k,t])=>hit(t)).map(([k,t,i])=>({i,t,s:'Git',h:'#/'+k}))],
+    ['Portföyler', PORTFOLIOS.filter(p=>hit(`${p.title} ${p.id} ${p.mah} ${p.ilce} ada ${p.tapu.ada}/${p.tapu.parsel} ${p.owner}`)).map(p=>({i:'building',t:p.title,s:`${p.id} · ${p.islem==='Kiralık'?tl(p.price)+'/ay':mTL(p.price)} · ${p.tapu.ada}/${p.tapu.parsel}`,h:'#/portfoy/'+p.id}))],
+    ['Müşteriler', CLIENTS.filter(c=>hit(`${c.name} ${c.tel} ${c.bolge.join(' ')} ${c.tip}`)).map(c=>({i:'users',t:c.name,s:`${c.tip} · ${c.tel}`,h:'#/musteri/'+c.id}))],
+    ['FSBO ilanları', FSBO.filter(f=>hit(`${f.ilan} ${f.owner} ${f.mah}`)).map(f=>({i:'radar',t:f.ilan,s:`Skor ${f.skor} · ${f.owner}`,act:()=>{ location.hash='#/radar'; setTimeout(()=>openCall(f.id),50); }}))]
+  ].map(([g,items])=>[g, n?items.slice(0,6):items.slice(0,4)]).filter(g=>g[1].length);
+  cmdItems = groups.flatMap(g=>g[1]); cmdSel = 0; let idx=0;
+  $('#cmdkRes').innerHTML = groups.length ? groups.map(([g,items])=>`<div class="grp">${g}</div>`+items.map(it=>`<div class="it ${idx===0?'sel':''}" data-i="${idx++}" role="option">${ic(it.i)}<span class="ellipsis">${esc(it.t)}</span><span class="s">${esc(it.s)}</span></div>`).join('')).join('') : `<div class="muted" style="padding:24px;text-align:center">"${esc(q)}" için sonuç yok</div>`;
+}
+function cmdGo(i){ const it=cmdItems[i]; if(!it) return; $('#cmdkOv').classList.remove('on'); if(it.act) it.act(); else location.hash=it.h; }
+$('#cmdkIn').addEventListener('input', e=>cmdSearch(e.target.value));
+$('#cmdkIn').addEventListener('keydown', e=>{
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); cmdSel=(cmdSel+(e.key==='ArrowDown'?1:-1)+cmdItems.length)%cmdItems.length; $$('#cmdkRes .it').forEach(x=>x.classList.toggle('sel',+x.dataset.i===cmdSel)); const s=$('#cmdkRes .it.sel'); if(s) s.scrollIntoView({block:'nearest'}); }
+  else if(e.key==='Enter'){ e.preventDefault(); cmdGo(cmdSel); }
+});
+$('#cmdkRes').addEventListener('click', e=>{ const it=e.target.closest('.it'); if(it) cmdGo(+it.dataset.i); });
+
+/* ================= Theme ================= */
+function storedTheme(){ try { return localStorage.getItem('dc-theme'); } catch(_) { return null; } }
+function isDark(){ const t=document.documentElement.dataset.theme; return t ? t==='dark' : matchMedia('(prefers-color-scheme: dark)').matches; }
+function setTheme(t){ document.documentElement.dataset.theme=t; try{ localStorage.setItem('dc-theme',t); }catch(_){} paintThemeBtn(); const sw=$('#darkSw'); if(sw) sw.setAttribute('aria-checked', isDark()); }
+function paintThemeBtn(){ $('#themeBtn').innerHTML = ic(isDark()?'sun':'moon'); }
+
+/* ================= Boot ================= */
+(function boot(){
+  const t=storedTheme(); if(t) document.documentElement.dataset.theme=t;
+  $('#logoMark').innerHTML = $('#logoMark2').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${ICONS.logo}</svg>`;
+  hydrateIcons(); renderNav(); paintThemeBtn();
+  prevRoute = route().name; render();
+})();
+</script>
+</body>
+</html>
