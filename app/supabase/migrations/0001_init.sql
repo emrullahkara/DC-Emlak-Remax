@@ -1,9 +1,9 @@
 -- DC Emlak — başlangıç şeması (tasarım §8)
+-- Konum alanları {lat, lng} jsonb olarak tutulur; ileride PostGIS'e geçilebilir.
 -- Çok kiracılı yapı: her kayıt bir ofise (office_id) aittir; erişim RLS ile
 -- ofis üyeliğine göre sınırlanır. Danışman kendi kayıtlarını, broker/asistan
 -- tüm ofis kayıtlarını görür.
 
-create extension if not exists postgis;
 create extension if not exists pg_trgm;
 
 -- ---------------------------------------------------------------------------
@@ -21,6 +21,7 @@ create table office (
   yetki_belgesi_gecerlilik date,
   plan plan_id not null default 'temel',
   deneme_bitis date default (current_date + 14),
+  varsayilan_ofis_payi numeric(5,2) not null default 50,
   created_at timestamptz not null default now()
 );
 
@@ -114,7 +115,7 @@ create table portfolio (
   imar jsonb not null default '{}',
   krediye_uygun boolean,
   ozellikler text[] not null default '{}',
-  konum geography(point),
+  konum jsonb, -- {lat, lng}
   paylasim_seviyesi text not null default 'ofis' check (paylasim_seviyesi in ('ozel','ofis','ag')),
   saglik_skoru int,
   eids_durum text not null default 'yok' check (eids_durum in ('yok','talep_edildi','onaylandi','reddedildi')),
@@ -123,7 +124,6 @@ create table portfolio (
   updated_at timestamptz not null default now()
 );
 create index portfolio_office_stage_idx on portfolio(office_id, asama);
-create index portfolio_geo_idx on portfolio using gist (konum);
 
 create table portfolio_owner (
   portfolio_id uuid not null references portfolio(id) on delete cascade,
@@ -163,6 +163,7 @@ create table document (
   durum text not null default 'taslak' check (durum in ('taslak','imzada','imzalandi','iptal')),
   pdf_path text,
   saklama_bitis date, -- silme koruması
+  imza_token text unique, -- uzaktan imza bağlantısı
   created_by uuid not null references auth.users(id),
   created_at timestamptz not null default now()
 );
@@ -171,10 +172,10 @@ create table signature (
   id uuid primary key default gen_random_uuid(),
   document_id uuid not null references document(id) on delete cascade,
   person_id uuid references person(id),
-  yontem text not null check (yontem in ('otp','e_imza','islak')),
+  yontem text not null check (yontem in ('otp','e_imza','islak','link')),
   imzalandi_at timestamptz,
-  ip inet,
-  konum geography(point),
+  ip text,
+  konum jsonb,
   kanit jsonb not null default '{}'
 );
 
@@ -202,7 +203,6 @@ create table search_profile (
   butce_tolerans numeric(5,2) default 5,
   ilceler text[] not null default '{}',
   mahalleler text[] not null default '{}',
-  bolge geography(polygon),
   oda_min numeric(3,1),
   m2_min numeric(8,2),
   kredi_kullanacak boolean not null default false,
@@ -286,7 +286,12 @@ create table fsbo_listing (
   sinyaller text[] not null default '{}',
   atanan_id uuid references auth.users(id),
   durum text not null default 'yeni' check (durum in ('yeni','arandi','gorusuldu','degerleme','yetki_alindi','vazgecildi')),
-  portfolio_id uuid references portfolio(id)
+  portfolio_id uuid references portfolio(id),
+  aciklama text,
+  foto_sayisi int,
+  piyasaya_gore_fark numeric(6,2),
+  malik_ad text,
+  malik_telefon text
 );
 
 -- ---------------------------------------------------------------------------
@@ -298,8 +303,10 @@ create table activity (
   user_id uuid not null references auth.users(id),
   person_id uuid references person(id),
   portfolio_id uuid references portfolio(id),
-  tur text not null, -- arama, mesaj, not, sesli_not, gosterim, eposta
+  tur text not null, -- arama, mesaj, not, sesli_not, gosterim, eposta, gorev
   icerik text,
+  vade timestamptz,
+  tamamlandi boolean,
   created_at timestamptz not null default now()
 );
 
