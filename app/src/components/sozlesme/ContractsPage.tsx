@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { Badge, Button, ButtonLink, Dialog, EmptyState, ErrorNote, Input, PageHeader, Spinner, Tabs, cx } from "@/components/ui";
 import { useTable } from "@/data/session";
 import type { DocumentStatus } from "@/data/types";
@@ -56,6 +57,13 @@ export function TemplatePreviewDialog({ template, onClose }: { template: Templat
 }
 
 export function ContractsPage() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const kvkkKisi = params.get("kvkk");
+  // CRM'in rıza bağlantısı (?kvkk=<kişi>) → açık rıza formu, kişi seçili
+  useEffect(() => {
+    if (kvkkKisi) router.replace(`/sozlesmeler/yeni?sablon=acik-riza-formu&kisi=${encodeURIComponent(kvkkKisi)}`);
+  }, [kvkkKisi, router]);
   const [tab, setTab] = useState<"belgeler" | "sablonlar">("belgeler");
   const [filter, setFilter] = useState<Filter>("hepsi");
   const [q, setQ] = useState("");
