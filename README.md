@@ -2,6 +2,7 @@
 
 Emlak ofisleri için SaaS: portföy, FSBO, müşteri, eşleştirme, ilan, sözleşme, komisyon ve mevzuat uyumu tek ekranda. Telefon ve masaüstünde çalışan PWA; ücretsiz katmanlarla (Supabase + Vercel) kurulur.
 
+- 🎞️ Tanıtım sunumu (kurulumdan kullanıma, 48 slayt): [PowerPoint](docs/sunum/DC-Emlak-Tanitim.pptx) · [PDF](docs/sunum/DC-Emlak-Tanitim.pdf)
 - 🚀 Canlıya alma (adım adım, teknik bilgi gerektirmez): [docs/KURULUM.md](docs/KURULUM.md)
 - 🧩 Uygulama (Next.js PWA + Supabase), komutlar ve klasör yapısı: [app/README.md](app/README.md)
 - 📐 Ürün ve sistem tasarımı: [docs/TASARIM.md](docs/TASARIM.md)
