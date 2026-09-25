@@ -57,7 +57,7 @@ describe("yetki sözleşmesi", () => {
     expect(yetkiDurumu([], bugun).durum).toBe("yok");
     expect(yetkiDurumu([ac({})], bugun).durum).toBe("imzasiz");
     const g = yetkiDurumu([ac({ imza_tarihi: "2026-01-01", bitis: "2026-10-04" })], bugun);
-    expect(g).toMatchObject({ durum: "gecerli", kalan: 11 });
+    expect(g).toMatchObject({ durum: "gecerli", kalan: 10 });
     expect(yetkiDurumu([ac({ imza_tarihi: "2026-01-01", bitis: "2026-09-01" })], bugun).durum).toBe("doldu");
   });
 

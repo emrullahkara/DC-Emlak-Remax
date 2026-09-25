@@ -188,3 +188,20 @@ describe("skorlar", () => {
     expect(h.sinyaller.join(" ")).toMatch(/Kat planı/);
   });
 });
+
+describe("takvim günü hesabı", () => {
+  it("dün biten yetki sözleşmesi süresi dolmuş sayılır, bugün biten hâlâ geçerli", async () => {
+    const { calendarDaysUntil } = await import("./compliance");
+    const now = new Date("2026-09-24T10:00:00");
+    expect(calendarDaysUntil(now, "2026-09-23")).toBe(-1);
+    expect(calendarDaysUntil(now, "2026-09-24")).toBe(0);
+    expect(calendarDaysUntil(now, "2026-10-24")).toBe(30);
+    const r = evaluateListingPublish({
+      bugun: now,
+      ofisYetkiBelgesiGecerlilik: "2030-01-01",
+      yetkiSozlesmesi: { imzaTarihi: "2026-03-01", baslangic: "2026-03-01", bitis: "2026-09-23" },
+      eidsOnayli: true,
+    });
+    expect(r.karar).toBe("ENGELLE");
+  });
+});

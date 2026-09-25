@@ -20,7 +20,7 @@ import type {
   SearchProfile,
   Showing,
 } from "../data/types";
-import type { ClosingContext, ListingContext } from "./compliance";
+import { calendarDaysUntil, type ClosingContext, type ListingContext } from "./compliance";
 import { norm } from "./import";
 import type { Portfolio as MatchPortfolio, SearchProfile as MatchProfile } from "./matching";
 import { paramsFor } from "./params";
@@ -69,7 +69,7 @@ function daysBetween(fromIso: string, to: Date): number {
 
 /** ISO tarih (YYYY-MM-DD) için bugüne göre kalan gün — uyum motoruyla aynı hesap */
 export function daysLeft(isoDate: string, bugun: Date): number {
-  return Math.ceil((new Date(isoDate + "T23:59:59").getTime() - bugun.getTime()) / GUN);
+  return calendarDaysUntil(bugun, isoDate);
 }
 
 /** Oda etiketi: 3 + 1 salon → "3+1" */

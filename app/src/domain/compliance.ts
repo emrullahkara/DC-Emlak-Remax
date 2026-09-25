@@ -69,9 +69,15 @@ export interface ContractSignContext {
 
 const GUN = 24 * 60 * 60 * 1000;
 
-function daysBetween(a: Date, bIso: string) {
-  return Math.ceil((new Date(bIso + "T23:59:59").getTime() - a.getTime()) / GUN);
+/**
+ * Takvim günü farkı: `bIso` (YYYY-MM-DD) tarihine bugünden kaç gün var.
+ * Bitiş günü dâhil geçerlidir (0 = bugün bitiyor), dün bitmişse -1.
+ */
+export function calendarDaysUntil(a: Date, bIso: string) {
+  const [y, m, d] = bIso.slice(0, 10).split("-").map(Number);
+  return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(a.getFullYear(), a.getMonth(), a.getDate())) / GUN);
 }
+const daysBetween = calendarDaysUntil;
 
 function combine(sonuclar: RuleResult[], bugun?: Date): Evaluation {
   const karar: Karar = sonuclar.some((s) => s.karar === "ENGELLE")
