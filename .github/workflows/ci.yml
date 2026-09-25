@@ -72,3 +72,5 @@ jobs:
           done
       - name: Duman testi (ofis kurulumu, davet, RLS)
         run: psql -q -v ON_ERROR_STOP=1 -f .github/workflows/ci-supabase-smoke.sql
+      - name: Güvenlik testi (kiracı izolasyonu, yetki yükseltme, imza ve belge bütünlüğü)
+        run: psql -q -v ON_ERROR_STOP=1 -f .github/workflows/ci-supabase-security.sql
