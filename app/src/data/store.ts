@@ -30,6 +30,8 @@ export interface DataStore {
   update<T extends TableName>(table: T, id: string, patch: Partial<Row<T>>): Promise<Row<T>>;
   remove<T extends TableName>(table: T, id: string): Promise<void>;
   subscribe(fn: (table: TableName) => void): () => void;
+  /** Sunucu tarafı işlemden (RPC) sonra ilgili tabloyu dinleyenleri yenile */
+  notify(table: TableName): void;
 }
 
 /** Birincil anahtarı `id` olmayan tablolar */
@@ -164,6 +166,10 @@ export class LocalStore implements DataStore {
     };
   }
 
+  notify(t: TableName) {
+    this.emit(t);
+  }
+
   /** Demo verisini sıfırla */
   reset(seed: () => DB) {
     this.db = seed();
@@ -183,6 +189,26 @@ function safeLocalStorage(): Storage | null {
 // ---------------------------------------------------------------------------
 // SupabaseStore
 // ---------------------------------------------------------------------------
+
+/**
+ * Veritabanı hatalarını kullanıcıya uygun Türkçe mesaja çevirir. Politika,
+ * kısıt ve tablo adları gibi iç ayrıntılar kullanıcıya gösterilmez; uygulamanın
+ * kendi (Türkçe) iş kuralı mesajları olduğu gibi iletilir.
+ */
+export function friendlyDbError(e: { code?: string; message?: string } | null | undefined): Error {
+  const code = e?.code ?? "";
+  const msg = e?.message ?? "";
+  const internal = /row-level security|permission denied|violates|constraint|relation|column|function|syntax|PGRST|JWT/i.test(msg);
+  if (!internal && msg) return new Error(msg);
+  if (code === "42501" || /row-level security|permission denied/i.test(msg)) return new Error("Bu işlem için yetkiniz yok.");
+  if (code === "23505") return new Error("Bu kayıt zaten var.");
+  if (code === "23503") return new Error("Bağlı kayıt bulunamadı veya kayıt başka kayıtlarda kullanılıyor.");
+  if (code === "23514" || code === "23502" || code === "22P02") return new Error("Girilen bilgiler geçerli değil.");
+  if (code === "PGRST301" || /JWT/i.test(msg)) return new Error("Oturumunuzun süresi doldu, lütfen yeniden giriş yapın.");
+  return new Error("İşlem tamamlanamadı. Lütfen tekrar deneyin.");
+}
+
+const PAGE = 1000;
 
 export class SupabaseStore implements DataStore {
   readonly mode = "supabase" as const;
@@ -206,10 +232,20 @@ export class SupabaseStore implements DataStore {
     for (const [k, v] of Object.entries(opts?.eq ?? {})) q = q.eq(k, v as never);
     for (const [k, vs] of Object.entries(opts?.in ?? {})) q = q.in(k, vs as never[]);
     if (opts?.order) q = q.order(opts.order.column as string, { ascending: opts.order.ascending ?? true });
-    if (opts?.limit) q = q.limit(opts.limit);
-    const { data, error } = await q;
-    if (error) throw error;
-    return (data ?? []) as Row<T>[];
+    if (opts?.limit) {
+      const { data, error } = await q.limit(opts.limit);
+      if (error) throw friendlyDbError(error);
+      return (data ?? []) as Row<T>[];
+    }
+    // Sunucunun satır sınırı (varsayılan 1000) sessizce kesmesin diye sayfalı okuma
+    const out: Row<T>[] = [];
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await q.range(from, from + PAGE - 1);
+      if (error) throw friendlyDbError(error);
+      out.push(...((data ?? []) as Row<T>[]));
+      if (!data || data.length < PAGE) break;
+    }
+    return out;
   }
 
   async get<T extends TableName>(t: T, id: string) {
@@ -217,13 +253,13 @@ export class SupabaseStore implements DataStore {
     let q = this.sb.from(t).select("*");
     for (const [k, v] of filters) q = q.eq(k, v);
     const { data, error } = await q.maybeSingle();
-    if (error) throw error;
+    if (error) throw friendlyDbError(error);
     return (data ?? null) as Row<T> | null;
   }
 
   async insert<T extends TableName>(t: T, row: Partial<Row<T>>) {
     const { data, error } = await this.sb.from(t).insert(row as never).select("*").single();
-    if (error) throw error;
+    if (error) throw friendlyDbError(error);
     this.emit(t);
     return data as Row<T>;
   }
@@ -234,7 +270,7 @@ export class SupabaseStore implements DataStore {
     let q = this.sb.from(t).update(body as never);
     for (const [k, v] of filters) q = q.eq(k, v);
     const { data, error } = await q.select("*").single();
-    if (error) throw error;
+    if (error) throw friendlyDbError(error);
     this.emit(t);
     return data as Row<T>;
   }
@@ -244,7 +280,11 @@ export class SupabaseStore implements DataStore {
     let q = this.sb.from(t).delete();
     for (const [k, v] of filters) q = q.eq(k, v);
     const { error } = await q;
-    if (error) throw error;
+    if (error) throw friendlyDbError(error);
+    this.emit(t);
+  }
+
+  notify(t: TableName) {
     this.emit(t);
   }
 

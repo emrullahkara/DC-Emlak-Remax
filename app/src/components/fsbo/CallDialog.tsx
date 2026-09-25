@@ -17,7 +17,7 @@ import {
   type CallResult,
   type FsboRow,
 } from "@/domain/fsbo";
-import { fmtDate, fmtDateTime, shortTL, todayISO } from "@/lib/format";
+import { safeHttpUrl, fmtDate, fmtDateTime, shortTL, todayISO } from "@/lib/format";
 import { DurumBadge, ScoreBadge, SignalBadges } from "./shared";
 
 function defaultAppointment(now: Date) {
@@ -178,8 +178,8 @@ export function CallDialog({ row, skor, sinyaller, members, onClose }: { row: Fs
         ) : (
           <p className="rounded-lg border border-dashed border-border p-3 text-center text-sm text-muted">
             Malik telefonu kayıtlı değil.{" "}
-            {row.kaynak_url && (
-              <a className="text-brand underline" href={row.kaynak_url} target="_blank" rel="noopener noreferrer">
+            {safeHttpUrl(row.kaynak_url) && (
+              <a className="text-brand underline" href={safeHttpUrl(row.kaynak_url)!} target="_blank" rel="noopener noreferrer">
                 İlana git
               </a>
             )}
@@ -263,10 +263,10 @@ export function CallDialog({ row, skor, sinyaller, members, onClose }: { row: Fs
             )}
           </div>
         </div>
-        {row.kaynak_url && (
+        {safeHttpUrl(row.kaynak_url) && (
           <p className="text-xs text-muted">
             Kaynak:{" "}
-            <a className="break-all text-brand underline" href={row.kaynak_url} target="_blank" rel="noopener noreferrer">
+            <a className="break-all text-brand underline" href={safeHttpUrl(row.kaynak_url)!} target="_blank" rel="noopener noreferrer">
               {row.kaynak_url}
             </a>{" "}
             <Badge>{row.kaynak === "danisman_linki" ? "Danışman bağlantısı" : row.kaynak === "manuel" ? "Manuel" : row.kaynak}</Badge>

@@ -6,7 +6,7 @@ import { Badge, Button, Checkbox, EmptyState, ErrorNote, PageHeader, Select, Spi
 import { useReadySession, useTable } from "@/data/session";
 import type { FsboListingRow, FsboStatus } from "@/data/types";
 import { callQueue, dayDiff, DURUM_ETIKET, funnel, isNew24h, parseDay, scorePatch, scoreRow, type FsboRow } from "@/domain/fsbo";
-import { shortTL } from "@/lib/format";
+import { safeHttpUrl, shortTL } from "@/lib/format";
 import { AddFsboDialog } from "./AddFsboDialog";
 import { CallDialog } from "./CallDialog";
 import { DurumBadge, ScoreBadge, SignalBadges } from "./shared";
@@ -151,8 +151,8 @@ export function FsboRadar() {
                 <ScoreBadge skor={puan} />
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    {row.kaynak_url ? (
-                      <a href={row.kaynak_url} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline">
+                    {safeHttpUrl(row.kaynak_url) ? (
+                      <a href={safeHttpUrl(row.kaynak_url)!} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline">
                         {row.baslik ?? "Başlıksız ilan"}
                       </a>
                     ) : (

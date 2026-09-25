@@ -2,6 +2,7 @@
  * Belge ve imza işlemleri (veri deposu üzerinden). Hem Sözleşmeler hem Takvim
  * modülü kullanır; kurallar `@/domain/templates` ve `@/domain/signing` içindedir.
  */
+import { getSupabase } from "@/lib/supabase/client";
 import { recordEvaluation } from "@/data/compliance-log";
 import type { DataStore } from "@/data/store";
 import type { DocumentRow, DocumentStatus, Signature } from "@/data/types";
@@ -80,6 +81,16 @@ export async function logSignEvaluation(store: DataStore, ctx: Ctx, doc: Documen
 
 /** Belgeyi imzaya açar: yeni tek kullanımlık belirteç, durum 'imzada'. */
 export async function openForSigning(store: DataStore, doc: DocumentRow): Promise<DocumentRow> {
+  if (store.mode === "supabase") {
+    // Belirteç ve geçerlilik süresi (14 gün) sunucuda üretilir; istemci yazamaz.
+    const sb = getSupabase();
+    if (!sb) throw new Error("Supabase bağlantısı yok");
+    const { error } = await sb.rpc("open_for_signing", { p_doc: doc.id });
+    if (error) throw new Error("İmza bağlantısı oluşturulamadı");
+    const fresh = await store.get("document", doc.id);
+    if (!fresh) throw new Error("Belge bulunamadı");
+    return fresh;
+  }
   return store.update("document", doc.id, { durum: "imzada", imza_token: generateToken() });
 }
 

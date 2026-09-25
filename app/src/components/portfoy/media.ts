@@ -23,8 +23,9 @@ export const MEDIA_TUR_LABEL: Record<MediaType, string> = {
   tur360: "360° tur",
 };
 
+/** Demo modunda saklanan JPEG veri adresi mi? Dış adresler (takip pikseli) kabul edilmez. */
 export function isInlineUrl(path: string) {
-  return path.startsWith("data:") || path.startsWith("http://") || path.startsWith("https://") || path.startsWith("blob:");
+  return /^data:image\/(jpeg|png|webp);base64,/.test(path);
 }
 
 /** Görseli en uzun kenar 1280 px olacak şekilde küçültüp JPEG'e çevirir */

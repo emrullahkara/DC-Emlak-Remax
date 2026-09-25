@@ -44,8 +44,13 @@ export async function buildExport(store: DataStore, officeId: string, now = new 
     EXPORT_TABLES.map(async (t) => {
       try {
         const rows = await store.list(t);
-        // Demo deposunda tek ofis vardır; Supabase'de RLS zaten ofisle sınırlar
-        tablolar[t] = t === "office" ? rows.filter((r) => (r as { id: string }).id === officeId) : rows;
+        // Yalnızca bu ofisin satırları (RLS'e ek güvence); ofis_id'si olmayan alt
+        // tablolar (rıza, imza…) RLS ile zaten ofise bağlı kayıtlarla sınırlıdır.
+        tablolar[t] = rows.filter((r) => {
+          const row = r as { id?: string; office_id?: string };
+          if (t === "office") return row.id === officeId;
+          return row.office_id === undefined || row.office_id === officeId;
+        });
       } catch (e) {
         hatalar[t] = e instanceof Error ? e.message : String(e);
       }
