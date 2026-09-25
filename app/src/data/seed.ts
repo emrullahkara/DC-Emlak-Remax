@@ -252,7 +252,10 @@ export function buildSeed(now: Date = new Date()): DB {
     showing,
     offer,
     deal,
-    commission_line: [],
+    commission_line: [
+      { id: "cl1", deal_id: "i1", taraf: "alici", matrah: 196_000, kdv: 39_200, tahsil_edildi: false },
+      { id: "cl2", deal_id: "i1", taraf: "satici", matrah: 196_000, kdv: 39_200, tahsil_edildi: false },
+    ],
     commission_split: [],
     fsbo_listing,
     activity,

@@ -1,6 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { createDocument, openForSigning } from "@/components/sozlesme/actions";
+import { signingUrl } from "@/domain/signing";
+import { autoValues, getTemplate, requiredMissing } from "@/domain/templates";
 import { useReadySession } from "@/data/session";
 import type { Consent, ConsentPurpose, Person } from "@/data/types";
 import { Badge, Button, Card, Select, toast } from "@/components/ui";
@@ -15,6 +19,7 @@ export function KvkkPanel({ person, consents }: { person: Person; consents: Cons
   const [kaynak, setKaynak] = useState("sozlu");
   const [busy, setBusy] = useState<string | null>(null);
   const [gecmis, setGecmis] = useState(false);
+  const router = useRouter();
 
   async function grant(amac: ConsentPurpose) {
     setBusy(amac);
@@ -46,22 +51,43 @@ export function KvkkPanel({ person, consents }: { person: Person; consents: Cons
     }
   }
 
+  /**
+   * Açık rıza formunu kişiye özel doldurur, tek kullanımlık imza bağlantısı
+   * üretir ve WhatsApp ile gönderir. Müşteri giriş yapmadan /imza/<token>
+   * sayfasında okuyup onaylar. Zorunlu alan eksikse belge düzenleyicisi açılır.
+   */
   async function sendLink() {
     if (!person.telefon) return toast("Kişinin telefonu yok");
-    const link = `${window.location.origin}/sozlesmeler?kvkk=${encodeURIComponent(person.id)}`;
-    const text = buildKvkkMessage({ kisiAdi: person.ad_soyad, ofisUnvani: office.unvan, link, danismanAdi: member.ad_soyad });
-    const url = await sendWhatsApp(person.telefon, text);
-    if (!url) return toast("WhatsApp bağlantısı oluşturulamadı");
+    const t = getTemplate("acik-riza-formu");
+    if (!t) return toast("Açık rıza formu şablonu bulunamadı");
+    setBusy("link");
     try {
+      const alanlar: Record<string, string> = {
+        ...autoValues({ office, member, person }),
+        aydinlatma_metni_surumu: t.surum,
+        imza_yontemi: "Uzaktan bağlantı ile elektronik onay",
+        _kisi_id: person.id,
+      };
+      if (requiredMissing(t, alanlar).length) {
+        router.push(`/sozlesmeler/yeni?sablon=acik-riza-formu&kisi=${encodeURIComponent(person.id)}`);
+        return;
+      }
+      const doc = await openForSigning(store, await createDocument(store, { officeId, userId }, t, alanlar, null));
+      const link = signingUrl(window.location.origin, doc.imza_token!);
+      const text = buildKvkkMessage({ kisiAdi: person.ad_soyad, ofisUnvani: office.unvan, link, danismanAdi: member.ad_soyad });
+      const url = await sendWhatsApp(person.telefon, text);
+      if (!url) return toast("WhatsApp bağlantısı oluşturulamadı");
       await store.insert("activity", {
         office_id: officeId,
         user_id: userId,
         person_id: person.id,
         tur: "mesaj",
-        icerik: "KVKK aydınlatma metni ve açık rıza bağlantısı WhatsApp ile gönderildi",
+        icerik: "KVKK aydınlatma metni ve açık rıza formu imza bağlantısı WhatsApp ile gönderildi",
       });
-    } catch {
-      // Aktivite kaydı başarısız olsa da mesaj açıldı
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Bağlantı oluşturulamadı");
+    } finally {
+      setBusy(null);
     }
   }
 
@@ -71,7 +97,7 @@ export function KvkkPanel({ person, consents }: { person: Person; consents: Cons
     <Card
       title="KVKK ve rızalar"
       actions={
-        <Button size="sm" onClick={sendLink} disabled={!person.telefon}>
+        <Button size="sm" onClick={sendLink} disabled={!person.telefon || busy === "link"}>
           Rıza linki gönder
         </Button>
       }

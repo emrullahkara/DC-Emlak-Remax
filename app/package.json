@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "sync:templates": "node scripts/sync-templates.mjs",
+    "prebuild": "node scripts/sync-templates.mjs",
+    "check:templates": "node scripts/sync-templates.mjs --check"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

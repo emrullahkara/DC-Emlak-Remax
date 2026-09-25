@@ -30,6 +30,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - run: npm run check:templates
       - run: npm run build
         env:
           # Derleme demo modunda doğrulanır; gerçek anahtarlar Vercel'de tanımlanır

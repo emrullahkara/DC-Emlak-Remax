@@ -357,7 +357,7 @@ function EvrakTab({ b }: { b: PortfolioBundle }) {
       </ul>
       <p className="mt-3 text-xs text-muted">
         Belge şablonları ve imza süreçleri için{" "}
-        <Link href="/sozlesmeler" className="text-brand underline">
+        <Link href={`/sozlesmeler/yeni?sablon=yetki-sozlesmesi&portfoy=${encodeURIComponent(p.id)}`} className="text-brand underline">
           Sözleşmeler
         </Link>{" "}
         modülünü kullanın. Liste portföy verisinden otomatik türetilir.
