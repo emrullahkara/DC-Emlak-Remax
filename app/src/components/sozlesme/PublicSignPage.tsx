@@ -55,7 +55,7 @@ export function PublicSignPage({ token }: { token: string }) {
     try {
       if (mode === "supabase" && supabase) {
         const { data, error: e } = await supabase.rpc("get_document_for_signing", { p_token: token });
-        if (e) throw e;
+        if (e) throw new Error("İmza kaydedilemedi. Lütfen danışmanınızla iletişime geçin.");
         const row = (Array.isArray(data) ? data[0] : data) as { id: string; sablon: string; alanlar: Record<string, string>; durum: string; unvan: string } | undefined;
         if (!row || row.durum !== "imzada") return setState("invalid");
         setDoc({ id: row.id, sablon: row.sablon, alanlar: row.alanlar ?? {}, unvan: row.unvan });
@@ -112,7 +112,7 @@ export function PublicSignPage({ token }: { token: string }) {
         const { data, error: e } = await supabase.rpc("sign_document", {
           p_token: token,
           p_ad_soyad: ad.trim(),
-          p_kanit: { ...ev.kanit, alanlar: ev.alanlar },
+          p_kanit: { sha256: sha, kvkk_onay: kvkk, okudum_onay: okudum },
           p_konum: konumJson,
         });
         if (e) throw e;
@@ -131,7 +131,7 @@ export function PublicSignPage({ token }: { token: string }) {
       setState("done");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
-      setError((e as Error).message || "İmza kaydedilemedi.");
+      setError(e instanceof Error && e.message.startsWith("Bu bağlantı") ? e.message : "İmza kaydedilemedi. Lütfen danışmanınızla iletişime geçin.");
     } finally {
       setBusy(false);
     }

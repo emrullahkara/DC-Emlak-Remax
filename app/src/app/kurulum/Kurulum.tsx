@@ -31,7 +31,7 @@ export function Kurulum() {
 
   useEffect(() => {
     if (mode !== "supabase") return;
-    if (status === "anon") router.replace(`/giris?next=${encodeURIComponent(`/kurulum${davet ? `?davet=${davet}` : ""}`)}`);
+    if (status === "anon") router.replace(`/giris?next=${encodeURIComponent(`/kurulum${davet ? `?davet=${encodeURIComponent(davet)}` : ""}`)}`);
     if (status === "ready") router.replace("/");
   }, [mode, status, davet, router]);
 

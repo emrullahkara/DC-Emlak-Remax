@@ -1,6 +1,6 @@
 // DC Emlak service worker — uygulama kabuğunu önbelleğe alır, çevrimdışıyken
 // son görülen sayfaları sunar. Veri senkronu uygulama katmanında yapılır.
-const CACHE = "dc-emlak-v1";
+const CACHE = "dc-emlak-v2";
 const SHELL = ["/", "/hesaplayicilar", "/icon.svg", "/manifest.webmanifest"];
 
 self.addEventListener("install", (e) => {
@@ -17,13 +17,18 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   const { request } = e;
-  if (request.method !== "GET" || new URL(request.url).origin !== location.origin) return;
-  // Ağ öncelikli, başarısızsa önbellek
+  const url = new URL(request.url);
+  if (request.method !== "GET" || url.origin !== location.origin) return;
+  // İmza bağlantıları ve davet kodları önbelleğe alınmaz (paylaşılan cihazda iz bırakmasın)
+  if (url.pathname.startsWith("/imza/") || url.searchParams.has("davet")) return;
+  // Ağ öncelikli; yalnızca başarılı, aynı kaynaklı ve önbelleğe izin veren yanıtlar saklanır
   e.respondWith(
     fetch(request)
       .then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(request, copy));
+        if (res.ok && res.type === "basic" && !/no-store/.test(res.headers.get("cache-control") || "")) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(request, copy));
+        }
         return res;
       })
       .catch(() => caches.match(request).then((r) => r || caches.match("/"))),

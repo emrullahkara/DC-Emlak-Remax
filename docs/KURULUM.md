@@ -102,7 +102,7 @@ Bu rehber, teknik bilgisi olmayan bir ofis sahibinin DC Emlak'ı **ücretsiz kat
 
 ## 6) Demo modu
 
-`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` tanımlı değilse uygulama **demo modunda** açılır:
+`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` tanımlı değilse uygulama **demo modunda** açılır. Güvenlik gereği yayındaki (production) bir kurulumda bu yalnızca **`NEXT_PUBLIC_DEMO=1`** ortam değişkeni eklendiğinde olur; aksi hâlde "Kurulum tamamlanmadı" ekranı gösterilir (gerçek müşteri verisi yanlışlıkla tarayıcıya yazılmasın diye). Yerel geliştirmede (`npm run dev`) bu değişken gerekmez.
 - Giriş gerekmez, örnek "DC Emlak Kadıköy" ofisi yüklenir.
 - Tüm değişiklikler yalnızca o tarayıcıda (localStorage) saklanır; başka cihaz veya kişi görmez.
 - **Ayarlar → Veri & KVKK → Demo verisini sıfırla** ile başa dönülür.

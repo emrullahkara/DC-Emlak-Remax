@@ -1,5 +1,6 @@
 "use client";
 
+import { mailtoLink } from "@/domain/signing";
 import { useState } from "react";
 import { Badge, Button, Card, Checkbox, Dialog, ErrorNote, EvaluationList, Field, Input, Select, Textarea, toast } from "@/components/ui";
 import { recordEvaluation } from "@/data/compliance-log";
@@ -444,7 +445,7 @@ function OwnerReportForm({ onClose, b, portfolio, perf }: { onClose: () => void;
             Kopyala
           </Button>
           <a
-            href={`mailto:${owner?.eposta ?? ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`}
+            href={mailtoLink(owner?.eposta, subject, text)}
             onClick={() => log("eposta")}
             className="inline-flex min-h-10 items-center rounded-lg border border-border bg-surface px-4 text-sm font-medium hover:bg-bg"
           >

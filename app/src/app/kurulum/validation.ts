@@ -1,3 +1,4 @@
+import { friendlyDbError } from "@/data/store";
 /**
  * Ofis kurulum formu doğrulaması (saf fonksiyonlar). Hem kurulumda hem
  * Ayarlar → Ofis sekmesinde kullanılır.
@@ -97,5 +98,6 @@ export function rpcErrorMessage(e: unknown): string {
   const m = e && typeof e === "object" && "message" in e ? String((e as { message: unknown }).message) : String(e);
   if (/could not find the function|schema cache/i.test(m)) return "Veritabanı kurulumu eksik: 0002_onboarding.sql migration'ı çalıştırılmamış olabilir.";
   if (/fetch|network/i.test(m)) return "Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edin.";
-  return m;
+  const code = e && typeof e === "object" && "code" in e ? String((e as { code: unknown }).code) : undefined;
+  return friendlyDbError({ code, message: m }).message;
 }

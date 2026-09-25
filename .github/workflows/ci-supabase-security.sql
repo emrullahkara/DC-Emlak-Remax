@@ -128,19 +128,34 @@ begin
   end;
 end $$;
 
--- Zayıf imza belirteci reddedilir
+-- İstemci imza belirtecini kendisi yazamaz (yalnızca open_for_signing)
 do $$
 begin
-  update document set durum = 'imzada', imza_token = 'kisa' where id = (select v from ctx where k = 'docA')::uuid;
-  raise exception 'HATA: kısa imza belirteci kabul edildi';
-exception when invalid_parameter_value then null;
+  update document set durum = 'imzada', imza_token = repeat('a', 40) where id = (select v from ctx where k = 'docA')::uuid;
+  raise exception 'HATA: istemci kendi imza belirtecini yazdı';
+exception when insufficient_privilege then null;
+end $$;
+
+-- Danışman komisyon yazamaz
+do $$
+begin
+  begin
+    perform save_commission(gen_random_uuid(), '[]', '[]');
+    raise exception 'HATA: danışman komisyon kaydetti';
+  exception when insufficient_privilege then null;
+  end;
 end $$;
 
 -- ============================================================================
 -- 3) Uzaktan imza: anonim kullanıcı yalnızca belirteçle, bir kez imzalar
 -- ============================================================================
 select pg_temp.act('00000000-0000-4000-8000-0000000000a1');
-update document set durum = 'imzada', imza_token = repeat('Z', 43) where id = (select v from ctx where k = 'docA')::uuid;
+update document set alanlar = alanlar || '{"_kisi_id":"gizli"}' where id = (select v from ctx where k = 'docA')::uuid;
+insert into ctx values ('token', open_for_signing((select v from ctx where k = 'docA')::uuid));
+do $$
+begin
+  if length((select v from ctx where k = 'token')) < 64 then raise exception 'HATA: imza belirteci kısa'; end if;
+end $$;
 
 reset role;
 set local role anon;
@@ -155,10 +170,11 @@ begin
   exception when insufficient_privilege then null;
   end;
   if exists (select 1 from get_document_for_signing(repeat('Y', 43))) then raise exception 'HATA: yanlış belirteçle belge okundu'; end if;
-  if not exists (select 1 from get_document_for_signing(repeat('Z', 43))) then raise exception 'HATA: doğru belirteçle belge okunamadı'; end if;
-  r := sign_document(repeat('Z', 43), 'Müşteri Adı', '{"alanlar":{"zaman_damgasi":"x","sahte_alan":"y"}}', null);
+  if not exists (select 1 from get_document_for_signing((select v from ctx where k = 'token'))) then raise exception 'HATA: doğru belirteçle belge okunamadı'; end if;
+  if (select alanlar ? '_kisi_id' from get_document_for_signing((select v from ctx where k = 'token'))) then raise exception 'HATA: iç alanlar imzalayana gösterildi'; end if;
+  r := sign_document((select v from ctx where k = 'token'), 'Müşteri Adı', '{"alanlar":{"zaman_damgasi":"sahte","sahte_alan":"y"},"belge_ozet_degeri":"sahte"}', null);
   if not (r->>'ok')::boolean then raise exception 'HATA: imza başarısız: %', r; end if;
-  r := sign_document(repeat('Z', 43), 'Müşteri Adı', '{}', null);
+  r := sign_document((select v from ctx where k = 'token'), 'Müşteri Adı', '{}', null);
   if (r->>'ok')::boolean then raise exception 'HATA: aynı bağlantıyla ikinci imza atıldı'; end if;
   begin
     r := sign_document(repeat('Q', 43), 'Müşteri', jsonb_build_object('p', repeat('x', 40000)), null);
@@ -175,6 +191,9 @@ do $$
 begin
   if (select alanlar ? 'sahte_alan' from document where id = (select v from ctx where k = 'docA')::uuid) then
     raise exception 'HATA: izinsiz kanıt alanı belgeye yazıldı';
+  end if;
+  if (select alanlar->>'zaman_damgasi' = 'sahte' or length(alanlar->>'belge_ozet_degeri') <> 64 from document where id = (select v from ctx where k = 'docA')::uuid) then
+    raise exception 'HATA: imza kanıtı istemciden alındı';
   end if;
   begin
     update document set alanlar = '{"ad":"değişti"}' where id = (select v from ctx where k = 'docA')::uuid;

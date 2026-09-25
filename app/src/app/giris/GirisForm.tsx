@@ -14,7 +14,7 @@ function trError(e: unknown): string {
   if (/expired|invalid/i.test(m)) return "Kod geçersiz veya süresi dolmuş. Yeni kod isteyin.";
   if (/signups not allowed|not allowed/i.test(m)) return "Bu e-posta ile kayıt kapalı. Ofis yöneticinizden davet isteyin.";
   if (/fetch|network/i.test(m)) return "Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edin.";
-  return m;
+  return "Giriş yapılamadı. Lütfen tekrar deneyin.";
 }
 
 export function GirisForm() {

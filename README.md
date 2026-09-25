@@ -5,6 +5,7 @@ Emlak ofisleri için SaaS: portföy, FSBO, müşteri, eşleştirme, ilan, sözle
 - 🎞️ Tanıtım sunumu (kurulumdan kullanıma, 48 slayt): [PowerPoint](docs/sunum/DC-Emlak-Tanitim.pptx) · [PDF](docs/sunum/DC-Emlak-Tanitim.pdf)
 - 🚀 Canlıya alma (adım adım, teknik bilgi gerektirmez): [docs/KURULUM.md](docs/KURULUM.md)
 - 🧩 Uygulama (Next.js PWA + Supabase), komutlar ve klasör yapısı: [app/README.md](app/README.md)
+- 🔒 Güvenlik modeli ve yetki sınırları: [docs/GUVENLIK.md](docs/GUVENLIK.md)
 - 📐 Ürün ve sistem tasarımı: [docs/TASARIM.md](docs/TASARIM.md)
 - 🖱️ Tıklanabilir prototip: [prototype/index.html](prototype/index.html)
 

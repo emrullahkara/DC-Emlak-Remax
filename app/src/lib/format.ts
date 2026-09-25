@@ -107,4 +107,15 @@ export const PERSON_TYPES: Record<string, string> = {
   referans: "Referans",
 };
 
+/** Yalnızca http(s) bağlantılarını döndürür (javascript:, data: vb. reddedilir) */
+export function safeHttpUrl(u?: string | null): string | null {
+  if (!u) return null;
+  try {
+    const x = new URL(u);
+    return x.protocol === "https:" || x.protocol === "http:" ? x.href : null;
+  } catch {
+    return null;
+  }
+}
+
 export const ILAN_TIPLERI: Record<string, string> = { satilik: "Satılık", kiralik: "Kiralık", devren: "Devren" };

@@ -1,5 +1,7 @@
 "use client";
 
+import { friendlyDbError } from "@/data/store";
+import { getSupabase } from "@/lib/supabase/client";
 import { useState } from "react";
 import { Badge, Button, Card, ErrorNote, Field, Input, Select, Spinner, Table, toast } from "@/components/ui";
 import { useReadySession, useTable } from "@/data/session";
@@ -39,7 +41,10 @@ function CommissionEditor({
   lines: CommissionLineRow[];
   splits: CommissionSplitRow[];
 }) {
-  const { store, office } = useReadySession();
+  const { store, office, member } = useReadySession();
+  // Paylaşımı broker kaydeder; tahsilatı broker ve takım lideri işaretler (veritabanı da zorunlu kılar)
+  const canSave = member.rol === "broker";
+  const canCollect = member.rol === "broker" || member.rol === "takim_lideri";
   const kira = portfolio.ilan_tipi === "kiralik";
   const [now] = useState(() => new Date());
   const params = paramsFor(now);
@@ -107,6 +112,21 @@ function CommissionEditor({
     if (!result || splitErr) return;
     setBusy(true);
     try {
+      if (store.mode === "supabase") {
+        // Tek işlemde, sunucuda (yarım kayıt kalmaz; yetki sunucuda denetlenir)
+        const sb = getSupabase();
+        if (!sb) throw new Error("Supabase bağlantısı yok");
+        const { error } = await sb.rpc("save_commission", {
+          p_deal: deal.id,
+          p_lines: result.satirlar.map((l) => ({ taraf: l.taraf, matrah: l.matrah, kdv: l.kdv })),
+          p_splits: split.map((s) => ({ alici_rol: s.alici, user_id: s.userId ?? null, oran: s.oran, tutar: s.tutar })),
+        });
+        if (error) throw friendlyDbError(error);
+        store.notify("commission_line");
+        store.notify("commission_split");
+        toast("Komisyon ve paylaşım kaydedildi");
+        return;
+      }
       const tahsil = new Map(lines.map((l) => [l.taraf, l.tahsil_edildi]));
       for (const l of lines) await store.remove("commission_line", l.id);
       for (const s of splits) await store.remove("commission_split", s.id);
@@ -237,7 +257,7 @@ function CommissionEditor({
               </tbody>
             </Table>
           )}
-          <Button variant="primary" disabled={!result || !!splitErr || busy} onClick={() => void save()}>
+          <Button variant="primary" disabled={!canSave || !result || !!splitErr || busy} title={canSave ? undefined : "Yalnızca broker kaydedebilir"} onClick={() => void save()}>
             Komisyonu ve paylaşımı kaydet
           </Button>
         </div>
@@ -250,7 +270,7 @@ function CommissionEditor({
           <div className="space-y-2">
             {lines.map((l) => (
               <label key={l.id} className="flex min-h-10 flex-wrap items-center gap-3 text-sm">
-                <input type="checkbox" className="h-4 w-4 accent-brand" checked={l.tahsil_edildi} onChange={() => void toggleTahsil(l)} />
+                <input type="checkbox" className="h-4 w-4 accent-brand" checked={l.tahsil_edildi} disabled={!canCollect} onChange={() => void toggleTahsil(l)} />
                 <span className="flex-1">{TARAF[l.taraf] ?? l.taraf} tarafı</span>
                 <span className="tabular-nums">{tl(l.matrah + l.kdv)}</span>
                 {l.tahsil_edildi ? <Badge tone="ok">Tahsil edildi</Badge> : <Badge tone="warn">Bekliyor</Badge>}
