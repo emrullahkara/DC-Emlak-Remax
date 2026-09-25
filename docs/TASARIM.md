@@ -22,7 +22,7 @@
 12. [Yapay Zekâ Katmanı](#12-yapay-zekâ-katmanı)
 13. [Yol Haritası (MVP → v3)](#13-yol-haritası-mvp--v3)
 14. [Başarı Ölçütleri](#14-başarı-ölçütleri)
-15. [Açık Sorular](#15-açık-sorular)
+15. [Alınan Kararlar](#15-alınan-kararlar-eylül-2026)
 
 ---
 
@@ -140,7 +140,7 @@ Açılışta danışmana üç soruyu cevaplar: **Bugün ne yapmalıyım? Param n
 
 > FSBO = *For Sale By Owner*. Türkiye'de portföyün en büyük kaynağı sahibinden ilanlarıdır.
 
-- **Kaynak takibi:** Danışmanın tanımladığı bölge/fiyat/tip filtreleriyle yayındaki "sahibinden" ilanlarının izlenmesi. *(Her platformun kullanım koşullarına uygun yöntemle; resmî API/iş ortaklığı öncelikli, yoksa danışmanın kendi kaydettiği arama bağlantıları ve manuel ekleme. Bkz. [Açık Sorular](#15-açık-sorular).)*
+- **Kaynak takibi:** Danışmanın tanımladığı bölge/fiyat/tip filtreleriyle yayındaki "sahibinden" ilanlarının izlenmesi. *(Her platformun kullanım koşullarına uygun yöntemle; resmî API/iş ortaklığı öncelikli, yoksa danışmanın kendi kaydettiği arama bağlantıları ve manuel ekleme. Bkz. [Alınan Kararlar](#15-alınan-kararlar-eylül-2026).)*
 - **Tekilleştirme:** Aynı mülk farklı sitelerde / farklı fiyatla → tek kayıt, fiyat geçmişiyle.
 - **FSBO Skoru:** İlan yaşı, fiyat düşüş sayısı, fiyatın piyasaya göre konumu, açıklamadaki sinyaller ("acil", "tayin", "yurt dışı"), fotoğraf kalitesi → **"sıcak mal sahibi"** tahmini.
 - **Arama Senaryoları:** Duruma göre hazır konuşma metni (itiraz karşılama: *"Komisyon vermem"*, *"Zaten kendim satarım"*, *"Başka emlakçı da aradı"*).
@@ -496,20 +496,27 @@ consent (person_id, channel, purpose, granted bool, source, granted_at, revoked_
 
 ## 9. Teknik Mimari
 
-### 9.1 Önerilen Yığın
-| Katman | Teknoloji | Gerekçe |
+### 9.1 Seçilen Yığın (ücretsiz katmanlarla başlangıç)
+
+> Karar: Başlangıç **ücretsiz katmanlarla** kurulur; ücretli servisler (SMS, WhatsApp Business API, yapay zekâ, e-imza, e-fatura) **adaptör olarak hazır ama kapalı** gelir. Ofis kendi hesabının anahtarıyla veya ücretli pakete geçerek açar.
+
+| Katman | Başlangıç (ücretsiz) | Büyüme (ücretli, hazır adaptör) |
 |---|---|---|
-| Mobil | **React Native (Expo)** | iOS+Android tek kod, çevrimdışı (WatermelonDB/SQLite), kamera, konum |
-| Web | **Next.js (React, TypeScript)** | Ofis paneli + herkese açık ilan/ofis siteleri (SEO) |
-| API | **Node.js (NestJS) TypeScript** | Mobil/web ile ortak tip sistemi, modüler yapı |
-| Veritabanı | **PostgreSQL + PostGIS** | İlişkisel + coğrafi sorgu |
-| Arama | OpenSearch / Meilisearch | Hızlı filtreli arama, Türkçe analiz |
-| Kuyruk/İş | Redis + BullMQ | FSBO tarama, ilan senkronu, bildirimler |
-| Dosya | S3 uyumlu depolama (TR bölgesi) + CDN | Fotoğraf/video/belge |
-| Kimlik | OIDC (Keycloak / Auth0) + OTP | SSO franchise, danışmana MFA |
-| Bildirim | FCM/APNs, SMS sağlayıcı, WhatsApp Business API | |
-| AI | LLM API (metin, özet, sınıflandırma) + görüntü modelleri | §12 |
-| Gözlem | OpenTelemetry, Sentry, Grafana | |
+| Uygulama | **Next.js (App Router, TypeScript) — PWA**: tek kod, masaüstü + telefonda ana ekrana eklenir, çevrimdışı önbellek | Native mobil (Expo) sonraki faz |
+| Barındırma | Vercel Hobby / Cloudflare Pages | Vercel Pro veya TR içi bulut |
+| Veritabanı + Auth + Dosya | **Supabase** (PostgreSQL + PostGIS + RLS + Auth + Storage) ücretsiz katman | Supabase Pro / kendi barındırılan Postgres |
+| Arama | PostgreSQL tam metin (Türkçe) + trigram | Meilisearch |
+| Arka plan işleri | Supabase cron / Edge Functions | Redis + BullMQ işçileri |
+| E-posta | Resend / SMTP ücretsiz katman | Kurumsal SMTP |
+| SMS | *Kapalı* — adaptör: Netgsm, İleti Merkezi vb. | Ofis anahtarı |
+| WhatsApp | Ücretsiz: `wa.me` derin bağlantı + hazır mesaj | WhatsApp Business Cloud API |
+| Yapay zekâ | *Kapalı* — kurallı şablon metinler | LLM API (ofis anahtarı veya Premium paket) |
+| İmza | Ücretsiz: e-posta/SMS link + tek kullanımlık kod ile onay kaydı | Nitelikli e-imza / mobil imza sağlayıcısı |
+| Fatura | Taslak PDF | e-Fatura/e-Arşiv entegratörü |
+| Harita | OpenStreetMap + Leaflet | Google Maps / Yandex |
+| Hata izleme | Sentry ücretsiz katman | |
+
+**Adaptör deseni:** Her dış servis `packages`/`lib/integrations` altında bir arayüz (`SmsProvider`, `AiProvider`, `SignatureProvider` …) ve bir **Null/Ücretsiz** uygulamayla gelir. Paket seviyesi veya ofisin girdiği anahtar hangi uygulamanın çalışacağını belirler; iş kodu servis türünü bilmez.
 
 ### 9.2 Mimari Şema
 ```
@@ -535,7 +542,7 @@ Senkron   İşçileri       (metin/görsel)  Servisi      Adaptörleri
 - Başlangıçta **modüler monolit** (tek dağıtım, net modül sınırları); ölçek gerektiren işçiler (FSBO, medya işleme, portal senkronu) ayrı servis.
 - **Çok kiracılı (multi-tenant):** Satır düzeyi güvenlik (PostgreSQL RLS) ile organizasyon/ofis izolasyonu.
 - **Çevrimdışı-önce mobil:** Yerel DB + çakışma çözümü (son yazan kazanır + alan bazlı birleştirme; kritik alanlarda kullanıcıya sor).
-- **Veri yerleşimi:** KVKK gereği Türkiye'de barındırma (yurt dışı aktarım kısıtları).
+- **Veri yerleşimi:** Ücretsiz katmanlar yurt dışında barındırır; KVKK yurt dışı aktarım şartları (standart sözleşme / açık rıza) aydınlatma metnine eklenir. Ücretli pakette TR içi barındırma seçeneği sunulur.
 
 ---
 
@@ -597,7 +604,7 @@ Kimlik/rol, çok kiracılı yapı, tasarım sistemi, veri modeli, uyum motoru is
 - Takvim + gösterim + **dijital Yer Gösterme Belgesi**
 - Yetki sözleşmesi şablonu + OTP imza, EİDS durum takibi (manuel adım)
 - Komisyon & maliyet hesaplayıcıları, KVKK rıza kaydı
-- Mobil (çevrimdışı temel) + Web panel
+- PWA (web + telefon, çevrimdışı temel önbellek), abonelik & deneme altyapısı
 
 ### Faz 2 — "Portföy Makinesi" (8 hafta)
 FSBO Radar, Değerleme (CMA) raporu, mal sahibi haftalık raporu, ilan metni AI, çok kanallı yayın (ilk 2 portal), Pazarlama Stüdyosu şablonları, birleşik gelen kutusu (WhatsApp + SMS).
@@ -624,17 +631,43 @@ Müşteri portalı, kira/mülk yönetimi, sanal tur & sanal mobilya, AI asistan,
 
 ---
 
-## 15. Açık Sorular
+## 15. Alınan Kararlar (Eylül 2026)
 
-1. **Hedef kitle önceliği:** Tek ofis mi (DC Emlak), yoksa baştan çok ofisli franchise ağı mı?
-2. **Portal entegrasyonları:** Hangi portallarla kurumsal hesap/API erişimi var? FSBO Radar için veri kaynağı her platformun kullanım koşullarına uygun şekilde nasıl sağlanacak (iş ortaklığı, danışmanın kendi aramaları, manuel ekleme)?
-3. **Platform önceliği:** Önce mobil mi, web mi? (Öneri: ikisi birlikte, mobil sahaya odaklı dar kapsamlı.)
-4. **Mevcut veri:** Excel/eski CRM'den içe aktarılacak portföy ve müşteri verisi var mı?
-5. **Komisyon modeli:** Ofiste kullanılan paylaşım oranları ve kademeleri neler?
-6. **Marka:** Kurumsal kimlik (logo, renk, font) ve uygulama adı.
-7. **Barındırma ve bütçe:** Türkiye içi bulut tercihi, aylık altyapı bütçesi.
-8. **Hukuk onayı:** Sözleşme şablonlarını onaylayacak avukat/danışman.
+| Konu | Karar |
+|---|---|
+| İş modeli | **SaaS ürünü** — önce DC Emlak ofisinde pilot, sonra diğer ofislere satış |
+| Hedef müşteri | **1–20 danışmanlı küçük/orta bağımsız emlak ofisleri** |
+| Platform | **Web + mobil uyumlu PWA**; native mobil sonraki faz |
+| Fiyatlama | **Danışman başı aylık + paketler** (Temel / Profesyonel / Premium), yıllıkta indirim, 14 gün deneme |
+| Marka | **DC Emlak** |
+| Altyapı | Ücretsiz katmanlar; ücretli servisler kapalı adaptör olarak hazır (§9.1) |
+| Portallar | İlk sürümde portal hesabı gerekmez: manuel ekleme, paylaşım linki, XML feed; kurumsal API iş ortaklığıyla sonra |
+| Sözleşme şablonları | En güncel mevzuata göre hazırlanır, **"Taslak — hukuk onayı bekliyor"** etiketiyle; satış öncesi hukuk kontrolü |
+| Sonraki adım | Tıklanabilir prototip + kod iskeleti **paralel** |
+
+### 15.1 SaaS Paketleri (taslak)
+
+| | **Temel** | **Profesyonel** | **Premium** |
+|---|---|---|---|
+| Hedef | Yeni / tek danışman | Aktif ofis | Büyüyen ofis |
+| Portföy, CRM, Eşleştirme, Takvim | ✔ | ✔ | ✔ |
+| Yer Gösterme Belgesi, Yetki Sözleşmesi, Uyum Motoru | ✔ | ✔ | ✔ |
+| Komisyon & maliyet hesaplayıcıları | ✔ | ✔ | ✔ |
+| FSBO Radar, CMA değerleme, mal sahibi raporu | – | ✔ | ✔ |
+| İşlem hattı, teklif, komisyon paylaşımı, ofis raporları | – | ✔ | ✔ |
+| Pazarlama Stüdyosu, çok kanallı yayın (XML) | – | ✔ | ✔ |
+| Yapay zekâ (ilan metni, sesli not, asistan) | – | Kendi anahtarı ile | Dâhil (kota) |
+| SMS / WhatsApp API / e-imza / e-fatura | Kendi anahtarı ile | Kendi anahtarı ile | Dâhil (kota) |
+| Müşteri portalı, kira yönetimi | – | – | ✔ |
+
+Fiyatlar pilot sonrası pazar geri bildirimiyle belirlenecektir. Abonelik yönetimi (deneme, paket değişimi, danışman sayısı) ürünün içinde, ödeme için sanal POS adaptörü (iyzico / PayTR) hazırlanır.
+
+### 15.2 Hâlâ Açık Olanlar
+- Pilot ofisteki komisyon paylaşım oranları (sistemde ofis bazında ayarlanabilir olacak).
+- Excel / eski sistemden veri aktarımı ihtiyacı (Excel içe aktarma sihirbazı her durumda yapılacak).
+- Hukuk onayı yapılacak avukat.
+- Logo, renk ve font (şimdilik geçici marka kimliği).
 
 ---
 
-*Sonraki adım:* Bu tasarım onaylandıktan sonra Faz 0 + Faz 1 için teknik iskelet (monorepo: `apps/mobile`, `apps/web`, `apps/api`, `packages/ui`, `packages/domain`) ve tıklanabilir arayüz prototipi hazırlanacaktır.
+*Sonraki adım:* Tıklanabilir prototip (`prototype/`) ve Faz 0–1 kod iskeleti (`app/` — Next.js PWA + Supabase) paralel hazırlanıyor.

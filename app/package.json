@@ -1,0 +1,37 @@
+{
+  "name": "dc-emlak",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "sync:templates": "node scripts/sync-templates.mjs",
+    "prebuild": "node scripts/sync-templates.mjs",
+    "check:templates": "node scripts/sync-templates.mjs --check"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.1",
+    "next": "15.5.26",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "read-excel-file": "^9.3.10",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.26",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^5.0.1"
+  }
+}
