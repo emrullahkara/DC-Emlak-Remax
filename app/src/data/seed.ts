@@ -125,10 +125,10 @@ export function buildSeed(now: Date = new Date()): DB {
     person(3, { ad_soyad: "Elif Karaca", telefon: "0544 663 10 58", tipler: ["alici"], kaynak: "Instagram", isi_skoru: 81, son_temas: iso(-1), sonraki_adim: "Fenerbahçe dubleks gösterimi", sonraki_adim_tarihi: iso(2) }),
     person(4, { ad_soyad: "Deniz Yurt", telefon: "0536 902 44 15", tipler: ["kiraci"], kaynak: "Web formu", isi_skoru: 66, son_temas: iso(-5), sonraki_adim: "İkinci görüşme", sonraki_adim_tarihi: iso(1) }),
     person(5, { ad_soyad: "Hakan Demirel", telefon: "0533 780 35 62", tipler: ["alici"], kaynak: "Tabela QR", isi_skoru: 28, son_temas: iso(-19) }),
-    person(6, { ad_soyad: "Hülya Ertem", telefon: "0532 555 12 18", tipler: ["satici"], kaynak: "FSBO Radar", son_temas: iso(-2) }),
-    person(7, { ad_soyad: "Canan Öztürk", telefon: "0544 115 20 71", tipler: ["satici"], kaynak: "FSBO Radar", son_temas: iso(-2), owner_id: DEMO_USERS.selin }),
-    person(8, { ad_soyad: "Levent Tan", telefon: "0533 410 22 40", tipler: ["satici"], kaynak: "Referans", son_temas: iso(-4) }),
-    person(9, { ad_soyad: "Gülay Sezer", telefon: "0530 222 11 55", tipler: ["satici"], kaynak: "Sfer", son_temas: iso(-1) }),
+    person(6, { ad_soyad: "Hülya Ertem", sonraki_adim: "Haftalık rapor gönder", sonraki_adim_tarihi: iso(1, 15), telefon: "0532 555 12 18", tipler: ["satici"], kaynak: "FSBO Radar", son_temas: iso(-2) }),
+    person(7, { ad_soyad: "Canan Öztürk", sonraki_adim: "Fiyat revizyonu görüşmesi", sonraki_adim_tarihi: iso(2, 15), telefon: "0544 115 20 71", tipler: ["satici"], kaynak: "FSBO Radar", son_temas: iso(-2), owner_id: DEMO_USERS.selin }),
+    person(8, { ad_soyad: "Levent Tan", sonraki_adim: "EİDS onayını hatırlat", sonraki_adim_tarihi: iso(0, 15), telefon: "0533 410 22 40", tipler: ["satici"], kaynak: "Referans", son_temas: iso(-4) }),
+    person(9, { ad_soyad: "Gülay Sezer", sonraki_adim: "Yetki sözleşmesi imzası", sonraki_adim_tarihi: iso(0, 15), telefon: "0530 222 11 55", tipler: ["satici"], kaynak: "Sfer", son_temas: iso(-1) }),
     person(10, { ad_soyad: "Olga Petrova", telefon: "+7 916 000 00 12", tipler: ["yabanci_alici"], kaynak: "Ağ/MLS", isi_skoru: 70, son_temas: iso(-4) }),
   ];
 

@@ -36,8 +36,12 @@ export interface SignatureProvider {
 
 // ---- Ücretsiz / Null uygulamalar -------------------------------------------
 
+/** wa.me için uluslararası numara (yalnız rakam). "+" / "00" ile başlayan yabancı numaralar korunur. */
 export function normalizeTrPhone(tel: string): string {
-  const d = tel.replace(/\D/g, "");
+  const t = tel.trim();
+  const d = t.replace(/\D/g, "");
+  if (t.startsWith("+")) return d;
+  if (d.startsWith("00")) return d.slice(2);
   if (d.startsWith("90")) return d;
   if (d.startsWith("0")) return "9" + d;
   return "90" + d;
