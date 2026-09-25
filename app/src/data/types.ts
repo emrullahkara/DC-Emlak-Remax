@@ -297,6 +297,9 @@ export interface FsboListingRow {
   piyasaya_gore_fark?: number | null;
   malik_ad?: string | null;
   malik_telefon?: string | null;
+  /** Takip kadansı (0004 ile eklenir) */
+  ilk_temas?: ISODate | null;
+  son_temas?: ISODateTime | null;
 }
 
 export interface Activity {
