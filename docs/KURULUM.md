@@ -2,6 +2,8 @@
 
 Bu rehber, teknik bilgisi olmayan bir ofis sahibinin DC Emlak'ı **ücretsiz katmanlarla** (Supabase + Vercel) kendi alan adında çalıştırması için adım adım yazılmıştır. Toplam süre: yaklaşık 30–45 dakika.
 
+> Görsel anlatım için: [Tanıtım sunumu (PDF)](sunum/DC-Emlak-Tanitim.pdf) — kurulum ve tüm modüller ekran görüntüleriyle.
+
 > İhtiyacınız olanlar: bir e-posta adresi, bir GitHub hesabı (ücretsiz), DC Emlak kodunun GitHub'daki kopyası (depo).
 
 ---
